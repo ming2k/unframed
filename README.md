@@ -16,6 +16,7 @@ An ultra-fast, modern, Wayland-native image viewer written in Rust and powered b
   - **Netpbm Family**: Full Netpbm support including P1/P4 (PBM), P2/P5 (PGM), P3/P6 (PPM), and P7 (PAM).
   - **Standard Raster**: PNG, JPEG, WebP, TIFF, BMP, QOI, Farbfeld, TGA, ICO, HDR, EXR.
   - **Animations**: Multi-frame animated GIF and animated WebP playback with frame delays and pause/play controls.
+  - **Transparency & Alpha Presentation**: Isolated Photoshop-style white/gray checkerboard, dark checkerboard, solid white, and solid black backings; press `b` to cycle modes with zero playback flicker.
 - **Flexible Viewport & Navigation**:
   - Scaling modes: `full` (fit to window), `shrink` (scale down only), `crop` (fill window), `none` (1:1 actual pixels).
   - Upscaling filters: `linear` (smooth bilinear) or `nearest_neighbour` (crisp pixel art).

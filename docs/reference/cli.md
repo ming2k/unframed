@@ -21,6 +21,7 @@ find . -name "*.png" | unframed [options]
 | `-h`, `--help` | None | Print command summary and exit immediately. | — |
 | `-v`, `--version` | None | Print version string and exit immediately. | `0.1.0` |
 | `-b` | `<background>` | Set canvas background: a 6-digit hex color (`RRGGBB` or `#RRGGBB`) or the literal string `checks` for transparency grid. | `000000` (black) |
+| `-B`, `--transparency` | `<mode>` | Set image transparency presentation: `checks-light`, `checks-dark`, `white`, `black`, or `off`. | `checks-light` |
 | `-c` | `<command>` | Command to execute immediately after launch. Can be repeated multiple times. | None |
 | `-C` | `<command>` | Command to execute whenever the active image changes. Can be repeated multiple times. | None |
 | `-d` | None | Enable OSD overlay visibility at launch. | `false` |

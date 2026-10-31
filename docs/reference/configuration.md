@@ -34,6 +34,7 @@ Lines starting with `#` or `;` are treated as comments and ignored.
 | Key | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `background` | String | `000000` | Canvas background. Either `checks` for a transparency checkerboard or a 6-digit hex color (`RRGGBB`). |
+| `transparency_grid` | String | `checks-light` | Image transparency backing mode: `checks-light` (Photoshop style), `checks-dark`, `white`, `black`, or `off`. |
 | `fullscreen` | Boolean | `false` | When `true`, Unframed opens directly in fullscreen mode. |
 | `width` | Integer | `1280` | Initial window pixel width. |
 | `height` | Integer | `720` | Initial window pixel height. |

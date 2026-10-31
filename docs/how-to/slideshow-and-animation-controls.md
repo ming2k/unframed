@@ -46,6 +46,15 @@ When an animated image format (such as multi-frame GIF or WebP) is loaded, Unfra
 - When an animation is paused, press `.` (period) or execute `:next_frame` to advance exactly one frame forward.
 - This allows frame-by-frame inspection of high-speed animations or sprite sheets.
 
+### Transparency Inspection (GIF & Alpha WebP)
+- Press `b` or execute `:transparency next` to cycle through image-bound backing modes:
+  - **Checks (Light)**: Photoshop-style pure white + neutral light gray (`#FFFFFF` / `#CCCCCC`).
+  - **Checks (Dark)**: Deep charcoal + dark steel (`#202020` / `#383838`).
+  - **Solid White**: Pure white (`#FFFFFF`) for inspecting dark lines and light-theme web rendering.
+  - **Solid Black**: Pure black (`#000000`) for inspecting bright graphics and dark-theme contrast.
+  - **Off**: Directly transparent to window canvas background.
+- Backing grids remain firmly locked to image bounds during panning, rotation, and zooming with zero animation flicker.
+
 ---
 
 ## 3. Looping and Playlist Termination

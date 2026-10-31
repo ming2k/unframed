@@ -37,6 +37,7 @@ Commands can be typed interactively after pressing `:`, triggered by keybindings
 | `overlay`| | Toggle visibility of OSD metrics banner. Aliased to `d`. |
 | `slideshow`| `<+amount\|-amount\|duration>` | Adjust slideshow timer or set interval directly. Aliased to `ss`. |
 | `background`| `<checks\|hex>` | Set background to transparency checkerboard or hex color code. Aliased to `bg`. |
+| `transparency`| `<checks-light\|checks-dark\|white\|black\|off\|next>` | Set image transparency backing grid or cycle presentation mode (`b` key). Aliased to `trans`. |
 | `next_frame`| | Advance one frame in animated GIF or WebP. |
 | `toggle_playing`| | Pause or resume animated playback. |
 | `exec` | `<shell command>` | Execute an asynchronous shell command with populated `$ufm_*` variables. |

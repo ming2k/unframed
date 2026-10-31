@@ -41,6 +41,7 @@ The following variables are dynamically expanded in `overlay_text` and `title_te
 | `$ufm_scaling_mode` | Active scaling mode (`none`, `shrink`, `full`, `crop`) | `full` |
 | `$ufm_upscaling_method`| Active upscaling filter (`linear`, `nearest_neighbour`) | `linear` |
 | `$ufm_format` | Format detected during decoding (`PNG`, `SVG`, `PPM`, etc.) | `SVG` |
+| `$ufm_transparency` | Active transparency backing mode (`checks-light`, `checks-dark`, `solid-white`, `solid-black`, `off`) | `checks-light` |
 | `$ufm_slideshow_duration` | Slideshow interval in seconds | `5.0` |
 | `$ufm_slideshow_elapsed` | Elapsed seconds since last slideshow cycle | `2.3` |
 | `$ufm_pid` | Process ID of this instance | `12345` |
