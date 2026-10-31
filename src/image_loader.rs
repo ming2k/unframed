@@ -18,6 +18,21 @@ pub struct FrameData {
     pub duration_ms: u32,
 }
 
+/// Normalize frame delays conforming to browser standards (HTML5/Chromium/Firefox specs):
+/// Zero delay or durations <= 10ms are clamped to 100ms (10 FPS) to prevent CPU burn and strobe.
+pub fn normalize_frame_delay(num: u32, denom: u32) -> u32 {
+    if denom == 0 || num == 0 {
+        100
+    } else {
+        let ms = num / denom;
+        if ms <= 10 {
+            100
+        } else {
+            ms
+        }
+    }
+}
+
 pub struct LoadedImage {
     pub width: u32,
     pub height: u32,
@@ -170,7 +185,7 @@ pub fn load_image_from_bytes(data: &[u8], hint_path: Option<&str>) -> Result<Loa
 
                     for f in raw_frames {
                         let (num, denom) = f.delay().numer_denom_ms();
-                        let delay_ms = if denom == 0 || num == 0 { 100 } else { num / denom };
+                        let delay_ms = normalize_frame_delay(num, denom);
                         let mut rgba = f.into_buffer().into_raw();
                         premultiply_rgba(&mut rgba);
                         frames.push(FrameData {
@@ -207,7 +222,7 @@ pub fn load_image_from_bytes(data: &[u8], hint_path: Option<&str>) -> Result<Loa
 
                         for f in raw_frames {
                             let (num, denom) = f.delay().numer_denom_ms();
-                            let delay_ms = if denom == 0 || num == 0 { 100 } else { num / denom };
+                            let delay_ms = normalize_frame_delay(num, denom);
                             let mut rgba = f.into_buffer().into_raw();
                             premultiply_rgba(&mut rgba);
                             frames.push(FrameData {
@@ -317,5 +332,19 @@ mod tests {
         assert_eq!(img.width, 1);
         assert_eq!(img.height, 1);
         assert_eq!(&img.frames[0].rgba[0..3], &[255, 0, 0]);
+    }
+
+    #[test]
+    fn test_normalize_frame_delay() {
+        // Zero delay fallback to 100ms
+        assert_eq!(normalize_frame_delay(0, 1), 100);
+        assert_eq!(normalize_frame_delay(10, 0), 100);
+        // <= 10ms clamped to 100ms
+        assert_eq!(normalize_frame_delay(5, 1), 100);
+        assert_eq!(normalize_frame_delay(10, 1), 100);
+        // > 10ms preserved exactly
+        assert_eq!(normalize_frame_delay(11, 1), 11);
+        assert_eq!(normalize_frame_delay(50, 1), 50);
+        assert_eq!(normalize_frame_delay(200, 2), 100);
     }
 }

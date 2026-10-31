@@ -18,21 +18,100 @@ use crate::ipc::IpcServer;
 use crate::navigator::Navigator;
 use crate::viewport::{ScalingMode, UpscalingMethod, Viewport, ZoomSource};
 
-fn draw_checkerboard(canvas: &flux::CanvasCommands<'_>, w: f32, h: f32, tile_size: f32, c1: u32, c2: u32) {
-    canvas.fill_rect(0.0, 0.0, w, h, c1);
-    let mut y = 0.0f32;
-    let mut row = 0;
-    while y < h {
-        let block_h = tile_size.min(h - y);
-        let mut x = if row % 2 == 0 { 0.0f32 } else { tile_size };
-        while x < w {
-            let block_w = tile_size.min(w - x);
-            canvas.fill_rect(x, y, block_w, block_h, c2);
-            x += tile_size * 2.0;
+fn draw_checkerboard(
+    canvas: &flux::CanvasCommands<'_>,
+    w: f32,
+    h: f32,
+    tile_size: f32,
+    c1: u32,
+    c2: u32,
+    visible_bounds: Option<(f32, f32, f32, f32)>,
+) {
+    let (min_x, min_y, max_x, max_y) = match visible_bounds {
+        Some((x0, y0, x1, y1)) => {
+            let start_x = x0.max(0.0);
+            let start_y = y0.max(0.0);
+            let end_x = x1.min(w);
+            let end_y = y1.min(h);
+            if start_x >= end_x || start_y >= end_y {
+                return;
+            }
+            (start_x, start_y, end_x, end_y)
         }
-        y += tile_size;
-        row += 1;
+        None => (0.0, 0.0, w, h),
+    };
+
+    // 1. Fill base tone across visible sub-rectangle
+    canvas.fill_rect(min_x, min_y, max_x - min_x, max_y - min_y, c1);
+
+    // 2. Compute tile row/col indices anchored to image origin (0, 0)
+    let row_start = (min_y / tile_size).floor() as i32;
+    let row_end = (max_y / tile_size).ceil() as i32;
+    let col_start = (min_x / tile_size).floor() as i32;
+    let col_end = (max_x / tile_size).ceil() as i32;
+
+    for r in row_start..row_end {
+        let box_y = (r as f32) * tile_size;
+        let draw_y = box_y.max(min_y);
+        let draw_h = ((box_y + tile_size).min(max_y) - draw_y).max(0.0);
+        if draw_h <= 0.0 {
+            continue;
+        }
+
+        for c in col_start..col_end {
+            if (r + c).rem_euclid(2) == 1 {
+                let box_x = (c as f32) * tile_size;
+                let draw_x = box_x.max(min_x);
+                let draw_w = ((box_x + tile_size).min(max_x) - draw_x).max(0.0);
+                if draw_w > 0.0 {
+                    canvas.fill_rect(draw_x, draw_y, draw_w, draw_h, c2);
+                }
+            }
+        }
     }
+}
+
+/// Compute the visible Axis-Aligned Bounding Box (AABB) of the screen viewport
+/// in the image's local coordinate system after inverse transformation.
+fn compute_local_viewport_aabb(
+    win_w: f32,
+    win_h: f32,
+    cx: f32,
+    cy: f32,
+    scaled_w: f32,
+    scaled_h: f32,
+    rotation_deg: f64,
+    mirrored: bool,
+) -> (f32, f32, f32, f32) {
+    let mirror_factor = if mirrored { -1.0f32 } else { 1.0f32 };
+    let rad = (rotation_deg * std::f64::consts::PI / 180.0) as f32;
+    let cos_t = rad.cos();
+    let sin_t = rad.sin();
+
+    // Map screen point (sx, sy) -> local image point (lx, ly)
+    let screen_to_local = |sx: f32, sy: f32| -> (f32, f32) {
+        let u0_x = sx - cx;
+        let u0_y = sy - cy;
+        // Inverse mirroring
+        let u1_x = u0_x * mirror_factor;
+        let u1_y = u0_y;
+        // Inverse rotation (by -rad):
+        let u2_x = u1_x * cos_t + u1_y * sin_t;
+        let u2_y = -u1_x * sin_t + u1_y * cos_t;
+        (u2_x + scaled_w * 0.5, u2_y + scaled_h * 0.5)
+    };
+
+    let p1 = screen_to_local(0.0, 0.0);
+    let p2 = screen_to_local(win_w, 0.0);
+    let p3 = screen_to_local(win_w, win_h);
+    let p4 = screen_to_local(0.0, win_h);
+
+    let min_x = p1.0.min(p2.0).min(p3.0).min(p4.0);
+    let max_x = p1.0.max(p2.0).max(p3.0).max(p4.0);
+    let min_y = p1.1.min(p2.1).min(p3.1).min(p4.1);
+    let max_y = p1.1.max(p2.1).max(p3.1).max(p4.1);
+
+    (min_x, min_y, max_x, max_y)
 }
 
 pub struct App {
@@ -772,7 +851,7 @@ impl App {
                 canvas.fill_rect(0.0, 0.0, win_w, win_h, col);
             }
             BackgroundMode::Checks => {
-                draw_checkerboard(&canvas, win_w, win_h, 24.0, 0xFF202020, 0xFF363636);
+                draw_checkerboard(&canvas, win_w, win_h, 24.0, 0xFF202020, 0xFF363636, None);
             }
         }
 
@@ -795,21 +874,65 @@ impl App {
 
             canvas.translate(-scaled_w * 0.5, -scaled_h * 0.5);
 
+            // Compute local visible viewport AABB to cull hidden checker tiles
+            let local_aabb = compute_local_viewport_aabb(
+                win_w,
+                win_h,
+                cx,
+                cy,
+                scaled_w,
+                scaled_h,
+                self.viewport.rotation,
+                self.viewport.mirrored,
+            );
+
             // Draw image-bound transparency grid if enabled
             match self.config.transparency_grid {
                 TransparencyGrid::ChecksLight => {
                     // Classic Photoshop light checkerboard (#FFFFFF and #CCCCCC)
-                    draw_checkerboard(&canvas, scaled_w, scaled_h, 16.0, 0xFFFFFFFF, 0xFFCCCCCC);
+                    draw_checkerboard(
+                        &canvas,
+                        scaled_w,
+                        scaled_h,
+                        16.0,
+                        0xFFFFFFFF,
+                        0xFFCCCCCC,
+                        Some(local_aabb),
+                    );
                 }
                 TransparencyGrid::ChecksDark => {
                     // Modern dark mode checkerboard (#202020 and #383838)
-                    draw_checkerboard(&canvas, scaled_w, scaled_h, 16.0, 0xFF202020, 0xFF383838);
+                    draw_checkerboard(
+                        &canvas,
+                        scaled_w,
+                        scaled_h,
+                        16.0,
+                        0xFF202020,
+                        0xFF383838,
+                        Some(local_aabb),
+                    );
                 }
                 TransparencyGrid::SolidWhite => {
-                    canvas.fill_rect(0.0, 0.0, scaled_w, scaled_h, 0xFFFFFFFF);
+                    let (x0, y0, x1, y1) = (
+                        local_aabb.0.max(0.0),
+                        local_aabb.1.max(0.0),
+                        local_aabb.2.min(scaled_w),
+                        local_aabb.3.min(scaled_h),
+                    );
+                    if x0 < x1 && y0 < y1 {
+                        canvas.fill_rect(x0, y0, x1 - x0, y1 - y0, 0xFFFFFFFF);
+                    }
                 }
                 TransparencyGrid::SolidBlack => {
-                    canvas.fill_rect(0.0, 0.0, scaled_w, scaled_h, 0xFF000000);
+                    let (x0, y0, x1, y1) = (
+                        local_aabb.0.max(0.0),
+                        local_aabb.1.max(0.0),
+                        local_aabb.2.min(scaled_w),
+                        local_aabb.3.min(scaled_h),
+                    );
+                    if x0 < x1 && y0 < y1 {
+                        canvas.fill_rect(x0, y0, x1 - x0, y1 - y0, 0xFF000000);
+                    }
                 }
                 TransparencyGrid::Off => {}
             }
@@ -1114,5 +1237,21 @@ mod tests {
         let app = App::new(config, vec![], None, vec![], vec![]);
         let text = app.format_overlay_text("[$ufm_current_index/$ufm_file_count] $ufm_scaling_mode");
         assert_eq!(text, "[0/0] full");
+    }
+
+    #[test]
+    fn test_compute_local_viewport_aabb() {
+        // Simple case: centered image 200x200 in 1000x1000 window, no rotation
+        // cx = 500, cy = 500
+        let aabb = compute_local_viewport_aabb(1000.0, 1000.0, 500.0, 500.0, 200.0, 200.0, 0.0, false);
+        // screen 0,0 maps to: u0 = -500, + 100 = -400
+        // screen 1000,1000 maps to: u0 = 500, + 100 = 600
+        assert_eq!(aabb, (-400.0, -400.0, 600.0, 600.0));
+
+        // When zoomed in 10x: image 2000x2000 in 1000x1000 window, center at 500, 500
+        let aabb_zoomed = compute_local_viewport_aabb(1000.0, 1000.0, 500.0, 500.0, 2000.0, 2000.0, 0.0, false);
+        // screen 0,0 maps to: -500 + 1000 = 500
+        // screen 1000,1000 maps to: 500 + 1000 = 1500
+        assert_eq!(aabb_zoomed, (500.0, 500.0, 1500.0, 1500.0));
     }
 }
