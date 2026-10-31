@@ -1005,20 +1005,20 @@ impl App {
             .unwrap_or_default();
 
         vec![
-            ("imv_pid", pid.clone()),
+            ("ufm_pid", pid.clone()),
             ("unframed_pid", pid),
-            ("imv_current_file", cur_file),
-            ("imv_format", format_name),
-            ("imv_scaling_mode", scaling_mode),
-            ("imv_upscaling_method", upscaling_method),
-            ("imv_loading", loading),
-            ("imv_current_index", cur_idx),
-            ("imv_file_count", file_count),
-            ("imv_width", w),
-            ("imv_height", h),
-            ("imv_scale", scale),
-            ("imv_slideshow_duration", duration),
-            ("imv_slideshow_elapsed", elapsed),
+            ("ufm_current_file", cur_file),
+            ("ufm_format", format_name),
+            ("ufm_scaling_mode", scaling_mode),
+            ("ufm_upscaling_method", upscaling_method),
+            ("ufm_loading", loading),
+            ("ufm_current_index", cur_idx),
+            ("ufm_file_count", file_count),
+            ("ufm_width", w),
+            ("ufm_height", h),
+            ("ufm_scale", scale),
+            ("ufm_slideshow_duration", duration),
+            ("ufm_slideshow_elapsed", elapsed),
         ]
     }
 }
@@ -1060,7 +1060,7 @@ mod tests {
     fn test_app_overlay_formatting() {
         let config = Config::default();
         let app = App::new(config, vec![], None, vec![], vec![]);
-        let text = app.format_overlay_text("[$imv_current_index/$imv_file_count] $imv_scaling_mode");
+        let text = app.format_overlay_text("[$ufm_current_index/$ufm_file_count] $ufm_scaling_mode");
         assert_eq!(text, "[0/0] full");
     }
 }

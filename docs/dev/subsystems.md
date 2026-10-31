@@ -24,8 +24,7 @@ src/
 └── bin/
     ├── ufm_msg.rs      # Native ufm-msg IPC tool
     ├── unframed.rs     # unframed alias binary
-    ├── unframed_msg.rs # unframed-msg alias tool
-    └── imv_msg.rs      # Backward-compatible imv-msg tool
+    └── unframed_msg.rs # unframed-msg alias tool
 ```
 
 ---

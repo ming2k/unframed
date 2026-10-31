@@ -4,18 +4,18 @@
 
 ---
 
-## 1. Why Rewrite `imv` in Rust?
+## 1. Design Motivation
 
-`imv` is a beloved, minimalist image viewer for tiling window managers. However, its original C implementation accumulated significant legacy complexity:
+Traditional image viewers often carry significant historical baggage:
 - Manual memory management across asynchronous decoders, bitmap pools, and format structs.
-- Two divergent window backend implementations: `wl_window.c` (Wayland) and `x11_window.c` (X11).
+- Divergent platform window backends and legacy X11 protocol glue.
 - Direct Cairo and GLX rendering, which suffers from tearing or software rasterization overhead on modern compositors.
 - Fragile string parsing and C pointer juggling for IPC and key bindings.
 
-Rewriting the project in Rust provides:
+Building `ufm` from the ground up in Rust provides:
 - **Compile-Time Memory Safety**: Eliminates use-after-free, double-free, and data races.
 - **Modern Hardware Acceleration**: Direct Vulkan 2D canvas drawing via `flux`.
-- **Pure Wayland Focus**: Zero lines of X11 legacy code.
+- **Pure Wayland Focus**: Zero lines of legacy display server glue.
 - **Robust Extensibility**: Rust's ecosystem provides production-grade decoders (`resvg`, `image`) without fragile external C library dependencies.
 
 ---

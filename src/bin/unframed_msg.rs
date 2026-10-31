@@ -30,8 +30,8 @@ fn main() {
 
     let mut stream = None;
     for dir in candidate_dirs {
-        let p1 = dir.join(format!("unframed-{pid}.sock"));
-        let p2 = dir.join(format!("imv-{pid}.sock"));
+        let p1 = dir.join(format!("ufm-{pid}.sock"));
+        let p2 = dir.join(format!("unframed-{pid}.sock"));
         if let Ok(s) = UnixStream::connect(&p1) {
             stream = Some(s);
             break;

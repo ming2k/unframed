@@ -30,7 +30,3 @@ path = "src/bin/ufm_msg.rs"
 [[bin]]
 name = "unframed-msg"
 path = "src/bin/unframed_msg.rs"
-
-[[bin]]
-name = "imv-msg"
-path = "src/bin/imv_msg.rs"

@@ -26,7 +26,7 @@ cargo build --release
 Upon successful compilation, the following binaries will be present in `target/release/`:
 - `unframed`: The primary image viewer application.
 - `unframed-msg`: The native IPC control utility.
-- `imv-msg`: Backwards-compatible symlink/binary for existing `imv` scripts.
+- `ufm-msg`: Companion IPC tool for controlling `ufm` from scripts.
 
 ---
 

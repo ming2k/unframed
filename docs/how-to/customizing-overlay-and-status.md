@@ -1,107 +1,58 @@
-# How to Customize the OSD Overlay and Window Title
+# How-to: Customizing Overlay and Status Display
 
-This guide details how to customize the On-Screen Display (OSD) overlay and window title bar in Unframed, including text templates, variable interpolation, typography, and color schemes.
-
----
-
-## 1. Overview of the OSD Overlay
-
-Unframed renders a crisp OSD overlay using the immediate-mode UI system `lens`. The overlay can be toggled on or off at runtime by pressing `d` or executing the `:overlay` command.
-
-The overlay text supports template substitution, allowing you to project runtime image properties, indices, and viewport metrics onto the canvas.
+Unframed provides a customizable on-screen display (OSD) overlay rendered directly above the canvas using `lens`.
 
 ---
 
-## 2. Template Variables
+## 1. Overlay Configuration Options
 
-The following variables can be embedded inside `overlay_text` and `title_text`:
-
-| Variable | Description |
-| :--- | :--- |
-| `${imv_current_index}` | 1-based index of the currently displayed image |
-| `${imv_file_count}` | Total number of items in the current playlist |
-| `${imv_width}` | Original pixel width of the loaded image |
-| `${imv_height}` | Original pixel height of the loaded image |
-| `${imv_scale}` | Current zoom percentage (e.g. `100`, `250`) |
-| `$imv_current_file` | File path or name of the currently displayed image |
-| `$imv_scaling_mode` | Active scaling mode (`none`, `shrink`, `full`, `crop`) |
-| `$imv_upscaling_method`| Active upscaling filter (`linear`, `nearest_neighbour`) |
-| `$imv_format` | Format detected during decoding (e.g., `PNG`, `SVG`, `PPM`) |
-
----
-
-## 3. Configuring the Overlay in `config`
-
-Add or edit the `[options]` section in `~/.config/unframed/config`:
+In `~/.config/ufm/config`, customize the `[options]` section:
 
 ```ini
 [options]
-# Initial visibility of the overlay on startup
+# Whether to start with overlay visible
 overlay = true
 
-# Font family and point size
-overlay_font = "Monospace:24"
-
-# Custom template string
-overlay_text = [${imv_current_index}/${imv_file_count}] $imv_current_file (${imv_width}x${imv_height}) - ${imv_scale}%
-
-# Text color in 6-digit RRGGBB or 8-digit AARRGGBB hex format
-overlay_text_color = FFFFFF
-
-# Background banner color (e.g., 50% translucent black)
-overlay_bg_color = 80000000
-
-# Position: false for top edge (default), true for bottom edge
+# Position: true for bottom, false for top (default)
 overlay_position_bottom = false
-```
 
----
-
-## 4. Customizing the Window Title Bar
-
-In Wayland compositors that show window title bars or task switchers, Unframed dynamically updates the window title based on `title_text`:
-
-```ini
-[options]
-title_text = "unframed: $imv_current_file [${imv_width}x${imv_height}]"
-```
-
-You can also override the initial title string at launch using the `-w` command-line flag:
-
-```bash
-unframed -w "Project Gallery" -r ~/Pictures
-```
-
----
-
-## 5. Style Examples
-
-### Minimal HUD
-Displays only the filename and dimensions in the bottom corner:
-```ini
-[options]
-overlay = true
-overlay_position_bottom = true
-overlay_font = "Sans:18"
-overlay_text = "$imv_current_file (${imv_width}x${imv_height})"
-overlay_bg_color = 00000000
+# Colors in 6-digit (RRGGBB) or 8-digit (AARRGGBB) hex
 overlay_text_color = FFFFFF
-```
+overlay_bg_color = C3000000
 
-### Full Metadata Banner
-Displays complete scaling, index, and format diagnostics:
-```ini
-[options]
-overlay = true
-overlay_font = "Monospace:20"
-overlay_text = "[#${imv_current_index}/${imv_file_count}] ${imv_width}x${imv_height}px | Scale: ${imv_scale}% | Mode: $imv_scaling_mode ($imv_upscaling_method) | File: $imv_current_file"
-overlay_bg_color = D0181818
-overlay_text_color = 00FFAA
+# Template string with variables
+overlay_text = [${ufm_current_index}/${ufm_file_count}] [${ufm_width}x${ufm_height}] [${ufm_scale}%] $ufm_current_file [$ufm_scaling_mode]
 ```
 
 ---
 
-## Next Steps
+## 2. Available Template Variables
 
-- **[Configuration Reference](../reference/configuration.md)**: Full list of configuration keys.
-- **[Command Reference](../reference/commands.md)**: Runtime command syntax.
+The following variables are dynamically expanded in `overlay_text` and `title_text`:
+
+| Variable | Description | Example |
+| :--- | :--- | :--- |
+| `${ufm_current_index}` | 1-based index of the currently displayed image | `3` |
+| `${ufm_file_count}` | Total number of items in the current playlist | `42` |
+| `${ufm_width}` | Original pixel width of the loaded image | `3840` |
+| `${ufm_height}` | Original pixel height of the loaded image | `2160` |
+| `${ufm_scale}` | Current zoom percentage | `100` |
+| `$ufm_current_file` | File path of the currently displayed image | `/home/user/Pictures/photo.jpg` |
+| `$ufm_scaling_mode` | Active scaling mode (`none`, `shrink`, `full`, `crop`) | `full` |
+| `$ufm_upscaling_method`| Active upscaling filter (`linear`, `nearest_neighbour`) | `linear` |
+| `$ufm_format` | Format detected during decoding (`PNG`, `SVG`, `PPM`, etc.) | `SVG` |
+| `$ufm_slideshow_duration` | Slideshow interval in seconds | `5.0` |
+| `$ufm_slideshow_elapsed` | Elapsed seconds since last slideshow cycle | `2.3` |
+| `$ufm_pid` | Process ID of this instance | `12345` |
+
+Both `${VAR}` and `$VAR` notations are supported. Standard environment variables (e.g. `$USER`, `$HOME`) can also be included.
+
+---
+
+## 3. Toggling Overlay at Runtime
+
+- Press **`d`** to toggle OSD visibility at any time.
+- Or open the `:` console and execute:
+  ```text
+  :overlay
+  ```

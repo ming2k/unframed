@@ -2,20 +2,20 @@
 
 [English](README.md) | [简体中文](README-zh.md)
 
-An ultra-fast, modern, Wayland-native image viewer written in Rust, powered by the **Optics** (`iris` + `flux` + `lens`) graphics stack and designed as an evolution of **`imv`**.
+An ultra-fast, modern, Wayland-native image viewer written in Rust and powered by the **Optics** (`iris` + `flux` + `lens`) graphics stack.
 
 ---
 
 ## Highlights
 
-- **Pure Wayland Architecture**: Tailored exclusively for modern Wayland desktop compositors (Sway, Hyprland, GNOME Wayland, KDE Plasma Wayland, River, etc.). X11 is completely dropped in favor of zero-overhead native Wayland protocols and Vulkan dynamic rendering via `optics`.
+- **Pure Wayland Architecture**: Tailored exclusively for modern Wayland desktop compositors (Sway, Hyprland, GNOME Wayland, KDE Plasma Wayland, River, etc.). Built from scratch without legacy X11 baggage, featuring zero-overhead native Wayland protocols and Vulkan dynamic rendering via `optics`.
 - **Powered by Optics Graphics Stack**:
   - **`iris`**: Direct Wayland platform shell, xdg-shell integration, display-driven event pacing, and window state management.
   - **`flux`**: High-performance Vulkan 2D canvas foundation for hardware-accelerated image drawing, sub-pixel transformations, and linear / nearest-neighbour sampling.
   - **`lens`**: Immediate-mode UI system rendering crisp OSD overlays and the command console.
-- **Expanded Format Support**:
+- **Comprehensive Format Support**:
   - **SVG**: Crisp vector rendering via `resvg` / `usvg` with arbitrary scaling.
-  - **PPM / PNM**: Full Netpbm family support including P1/P4 (PBM), P2/P5 (PGM), P3/P6 (PPM), and P7 (PAM).
+  - **Netpbm Family**: Full Netpbm support including P1/P4 (PBM), P2/P5 (PGM), P3/P6 (PPM), and P7 (PAM).
   - **Standard Raster**: PNG, JPEG, WebP, TIFF, BMP, QOI, Farbfeld, TGA, ICO, HDR, EXR.
   - **Animations**: Multi-frame animated GIF and animated WebP playback with frame delays and pause/play controls.
 - **Flexible Viewport & Navigation**:
@@ -25,11 +25,11 @@ An ultra-fast, modern, Wayland-native image viewer written in Rust, powered by t
   - Clockwise rotation (`rotate by 90`) and horizontal / vertical mirroring (`flip`).
 - **Interactive Console & Scriptable IPC**:
   - Interactive `:` command console with history navigation, line editing, and tab completion.
-  - Full IPC over UNIX domain sockets compatible with `imv-msg` (`$XDG_RUNTIME_DIR/ufm-$PID.sock` and `imv-$PID.sock`).
-  - Companion CLI tools: `ufm-msg` and `imv-msg`.
+  - Full IPC over UNIX domain sockets (`$XDG_RUNTIME_DIR/ufm-$PID.sock`).
+  - Companion CLI tool: `ufm-msg`.
 - **Keyboard Sequences & Configuration**:
   - Trie-based keybinding engine supporting multi-key chords (`gg`, `<Shift+G>`, `<Ctrl+r>`, `<bracketleft>`, etc.).
-  - Full ini configuration compatibility with `imv` (`[options]`, `[aliases]`, `[binds]`).
+  - Flexible INI configuration (`[options]`, `[aliases]`, `[binds]`).
 
 ---
 
@@ -50,9 +50,8 @@ cargo build --release
 ```
 
 Binaries will be placed in `target/release/`:
-- **`ufm`**: Main image viewer binary (aliased as `unframed`)
-- **`ufm-msg`**: Native IPC client utility
-- **`imv-msg`**: Backward-compatible IPC client utility
+- **`ufm`**: Primary image viewer binary (aliased as `unframed`)
+- **`ufm-msg`**: IPC client utility (aliased as `unframed-msg`)
 
 ---
 
@@ -131,7 +130,7 @@ Press `:` at any time to open the interactive command console. Supported command
 - `background <checks|hex>`: Change background appearance.
 - `center`: Re-center image.
 - `reset`: Reset viewport transforms.
-- `exec <shell command>`: Execute shell command with `$imv_*` and `$unframed_*` environment variables.
+- `exec <shell command>`: Execute shell command with `$ufm_*` environment variables.
 - `bind <keys> <commands>`: Add or update a keybinding dynamically.
 - `alias <name> <command>`: Add a command alias.
 
@@ -139,9 +138,9 @@ Press `:` at any time to open the interactive command console. Supported command
 
 ## IPC Scripting
 
-`ufm` listens on `$XDG_RUNTIME_DIR/ufm-$PID.sock` and `$XDG_RUNTIME_DIR/imv-$PID.sock`.
+`ufm` listens on `$XDG_RUNTIME_DIR/ufm-$PID.sock`.
 
-You can control a running instance with `ufm-msg` or `imv-msg`:
+You can control a running instance with `ufm-msg`:
 
 ```bash
 # Next image

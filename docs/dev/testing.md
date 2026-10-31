@@ -34,7 +34,7 @@ The test suite contains **34 automated tests** covering every critical subsystem
 - `test_ppm_all_variants`: Full Netpbm verification across P1 (ASCII PBM), P2 (ASCII PGM), P3 (ASCII PPM), P4 (Binary PBM), P5 (Binary PGM), P6 (Binary PPM), and P7 (PAM with alpha).
 - `test_svg_rendering_and_dimensions`: Validates SVG parsing, intrinsic viewBox calculation, and scaled rasterization.
 - `test_gif_animation_loading_and_tick`: Verifies multi-frame GIF decoding, timeline accumulator, and frame transitions.
-- `test_load_png_bytes` & `test_test_images_from_imv`: Regression tests loading real PNG, JPEG, TIFF, and WebP sample images from `../imv/test/data`.
+- `test_load_png_bytes` & `test_sample_image_decoding`: Tests loading PNG and BMP sample images.
 
 ### Viewport & Transformation Tests
 - `test_viewport_scaling_modes`: Verifies `full`, `shrink`, `crop`, and `none` aspect ratio calculations.

@@ -1,4 +1,4 @@
-# Default config for unframed (imv-compatible)
+# Default configuration for ufm
 
 [options]
 # Suppress built-in key bindings and specify them explicitly in this config file
@@ -21,7 +21,7 @@ background = 000000
 overlay = false
 
 # Overlay text template
-overlay_text = [${imv_current_index}/${imv_file_count}] [${imv_width}x${imv_height}] [${imv_scale}%] $imv_current_file [$imv_scaling_mode]
+overlay_text = [${ufm_current_index}/${ufm_file_count}] [${ufm_width}x${ufm_height}] [${ufm_scale}%] $ufm_current_file [$ufm_scaling_mode]
 
 [aliases]
 # Define command aliases
@@ -80,7 +80,7 @@ f = fullscreen
 d = overlay
 s = scaling next
 <Shift+S> = upscaling next
-p = exec echo $imv_current_file
+p = exec echo $ufm_current_file
 
 # Animation playback
 <period> = next_frame

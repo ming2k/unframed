@@ -8,11 +8,11 @@ This document specifies the format, sections, syntax, and options supported by U
 
 Unframed resolves its configuration file by checking the following paths in order of priority:
 
-1. `$unframed_config` environment variable
-2. `$imv_config` environment variable
-3. `$XDG_CONFIG_HOME/unframed/config` (or `~/.config/unframed/config`)
-4. `$XDG_CONFIG_HOME/imv/config` (or `~/.config/imv/config`)
-5. `/etc/imv_config`
+1. `$ufm_config` environment variable
+2. `$unframed_config` environment variable
+3. `$XDG_CONFIG_HOME/ufm/config` (or `~/.config/ufm/config`)
+4. `$XDG_CONFIG_HOME/unframed/config` (or `~/.config/unframed/config`)
+5. `/etc/ufm/config`
 
 If no configuration file is found, built-in defaults are used.
 
@@ -96,7 +96,7 @@ c = center
 r = reset
 
 # Shell command execution
-p = exec echo "$imv_current_file"
+p = exec echo "$ufm_current_file"
 ```
 
 ---

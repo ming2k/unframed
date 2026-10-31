@@ -304,20 +304,18 @@ mod tests {
     }
 
     #[test]
-    fn test_test_images_from_imv() {
-        // Test loading sample files from ../imv/test/data if they exist
-        let paths = [
-            "../imv/test/data/sample.png",
-            "../imv/test/data/sample.jpeg",
-            "../imv/test/data/sample.tiff",
-            "../imv/test/data/sample.webp",
+    fn test_sample_image_decoding() {
+        // 1x1 24-bit RGB BMP image
+        let bmp_data = [
+            0x42, 0x4d, 0x3a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00,
+            0x28, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
+            0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x13, 0x0b, 0x00, 0x00,
+            0x13, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0xff, 0x00,
         ];
-        for p in paths {
-            if Path::new(p).exists() {
-                let img = load_image_from_path(p).unwrap_or_else(|e| panic!("failed on {p}: {e}"));
-                assert!(img.width > 0);
-                assert!(img.height > 0);
-            }
-        }
+        let img = load_image_from_bytes(&bmp_data, Some("test.bmp")).expect("load bmp");
+        assert_eq!(img.width, 1);
+        assert_eq!(img.height, 1);
+        assert_eq!(&img.frames[0].rgba[0..3], &[255, 0, 0]);
     }
 }

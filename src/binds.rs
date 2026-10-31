@@ -1,4 +1,4 @@
-//! Key sequence bindings matching imv's trie-based key handling.
+//! Key sequence bindings using a Trie-based prefix tree.
 
 use lens::key;
 use lens::mods;
@@ -138,7 +138,7 @@ impl Binds {
         self.add("x", "close");
         self.add("f", "fullscreen");
         self.add("d", "overlay");
-        self.add("p", "exec echo $imv_current_file");
+        self.add("p", "exec echo $ufm_current_file");
         self.add("c", "center");
         self.add("s", "scaling next");
         self.add("<Shift+S>", "upscaling next");
@@ -323,11 +323,11 @@ mod tests {
     #[test]
     fn test_binds_multiple_commands() {
         let mut binds = Binds::new();
-        binds.add("<Shift+X>", "exec rm \"$imv_current_file\"; close");
+        binds.add("<Shift+X>", "exec rm \"$ufm_current_file\"; close");
         assert_eq!(
             binds.handle_key("<Shift+X>"),
             BindAction::Execute(vec![
-                "exec rm \"$imv_current_file\"".into(),
+                "exec rm \"$ufm_current_file\"".into(),
                 "close".into()
             ])
         );

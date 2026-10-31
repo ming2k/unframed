@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README-zh.md)
 
-一个现代、超高性能、纯 Wayland 原生的 Rust 图像查看器。底层基于 **Optics** (`iris` + `flux` + `lens`) 图形栈构建，作为经典工具 **`imv`** 的内存安全与现代架构进化版。
+一个现代、超高性能、纯 Wayland 原生的 Rust 图像查看器。底层完全基于 **Optics** (`iris` + `flux` + `lens`) 图形技术栈构建。
 
 ---
 
@@ -24,11 +24,11 @@
   - 支持顺时针旋转（`rotate by 90`）与水平/垂直轴镜像（`flip`）。
 - **命令行控制台与 IPC 脚本化**：
   - 按 `:` 随时唤出内置交互式控制台，支持行编辑、历史翻阅与 Tab 自动补全。
-  - 兼容 `imv-msg` 的 UNIX 域套接字通信机制（`$XDG_RUNTIME_DIR/ufm-$PID.sock` 与 `imv-$PID.sock`）。
-  - 配套命令行工具：`ufm-msg` 与 `imv-msg`。
+  - 原生 UNIX 域套接字通信机制（`$XDG_RUNTIME_DIR/ufm-$PID.sock`）。
+  - 配套命令行工具：`ufm-msg`。
 - **按键前缀树序列与配置系统**：
   - Trie 前缀树按键解析器，原生支持多键组合（如 `gg` 跳转第一张，`<Shift+G>` 跳转最后一张，`<Ctrl+r>` 旋转等）。
-  - 兼容 `imv` 的 INI 配置文件语法（`[options]`, `[aliases]`, `[binds]`）。
+  - INI 配置文件语法（`[options]`, `[aliases]`, `[binds]`）。
 
 ---
 
@@ -50,7 +50,6 @@ cargo build --release
 编译产物位于 `target/release/`：
 - **`ufm`**：主图像查看器二进制（兼具别名 `unframed`）
 - **`ufm-msg`**：跨进程 IPC 控制工具
-- **`imv-msg`**：向下兼容原版脚本的 IPC 控制工具
 
 ---
 
@@ -129,7 +128,7 @@ ufm -t 5 ~/Wallpapers
 - `background <checks|hex>` (别名 `bg`): 切换背景样式
 - `center` (别名 `c`): 重新居中
 - `reset` (别名 `r`): 重置所有视口变换
-- `exec <shell command>`: 执行 Shell 脚本（暴露 `$imv_*` 环境变量）
+- `exec <shell command>`: 执行 Shell 脚本（暴露 `$ufm_*` 环境变量）
 - `bind <keys> <commands>`: 动态注册快捷键绑定
 - `alias <name> <command>`: 动态声明命令别名
 
@@ -137,9 +136,9 @@ ufm -t 5 ~/Wallpapers
 
 ## 进程间通信 (IPC)
 
-`ufm` 监听 `$XDG_RUNTIME_DIR/ufm-$PID.sock` 与 `$XDG_RUNTIME_DIR/imv-$PID.sock`。
+`ufm` 监听 `$XDG_RUNTIME_DIR/ufm-$PID.sock`。
 
-可以通过配套的 `ufm-msg` 或 `imv-msg` 命令行工具在外部自动化控制：
+可以通过配套的 `ufm-msg` 命令行工具在外部自动化控制：
 
 ```bash
 # 控制下一张
@@ -160,10 +159,10 @@ ufm-msg $PID open ~/Pictures/new.svg
 ## 配置文件
 
 配置文件搜索优先级依次为：
-1. `$ufm_config` 或 `$imv_config`
-2. `$XDG_CONFIG_HOME/unframed/config` 或 `$XDG_CONFIG_HOME/imv/config`
-3. `~/.config/unframed/config` 或 `~/.config/imv/config`
-4. `/etc/imv_config`
+1. `$ufm_config`
+2. `$XDG_CONFIG_HOME/ufm/config`
+3. `~/.config/ufm/config`
+4. `/etc/ufm/config`
 
 完整配置文件参考见 [`files/config`](files/config)。
 

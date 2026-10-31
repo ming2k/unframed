@@ -1,64 +1,87 @@
-# How to Configure Keybindings and Aliases
+# How-to: Configure Custom Keybindings
 
-This guide explains how to customize keybindings, define multi-key chord sequences, configure custom aliases, and suppress default bindings in Unframed.
-
----
-
-## 1. Locating or Creating Your Configuration File
-
-Unframed searches for configuration files in the following order:
-
-1. Path specified by `$unframed_config` or `$imv_config` environment variable
-2. `$XDG_CONFIG_HOME/unframed/config` or `$XDG_CONFIG_HOME/imv/config`
-3. `~/.config/unframed/config` or `~/.config/imv/config`
-4. `/etc/imv_config`
-
-Create the configuration directory and file:
-
-```bash
-mkdir -p ~/.config/unframed
-touch ~/.config/unframed/config
-```
+This guide explains how to define shortcuts, multi-key chords, and command bindings in Unframed (`ufm`).
 
 ---
 
-## 2. Binding Keys in the `[binds]` Section
+## 1. Locating the Configuration File
 
-The `[binds]` section maps key sequences directly to commands.
+Unframed looks for configuration files at:
+
+1. Path specified by `$ufm_config` or `$unframed_config` environment variable
+2. `$XDG_CONFIG_HOME/ufm/config` (or `~/.config/ufm/config`)
+3. `~/.ufm_config`
+4. `/etc/ufm/config`
+
+Create `~/.config/ufm/config` if it does not yet exist.
+
+---
+
+## 2. Binding Syntax
+
+Keybindings are configured inside the `[binds]` section:
 
 ```ini
 [binds]
-# Single key mapping
-q = quit
-x = close
-
-# Multi-key chord sequences (prefix trie)
-gg = goto 1
-
-# Special keys enclosed in angle brackets
-<Left> = prev
-<Right> = next
-<bracketleft> = prev
-<bracketright> = next
-<space> = toggle_playing
-
-# Modifier combinations (Shift, Ctrl)
-<Shift+G> = goto -1
-<Ctrl+r> = rotate by 90
-<Shift+plus> = zoom 1
-<minus> = zoom -1
+# <KeySpec> = <Command> [; <AdditionalCommand>...]
 ```
 
-### Supported Key Tokens
-- **Letters & Numbers**: `a`–`z`, `0`–`9`.
-- **Special Keys**: `<Left>`, `<Right>`, `<Up>`, `<Down>`, `<space>`, `<period>`, `<minus>`, `<bracketleft>`, `<bracketright>`.
-- **Modifiers**: Combined with `+`, such as `<Shift+G>`, `<Ctrl+r>`, `<Shift+S>`, `<Shift+T>`.
+### Single Character Keys
+```ini
+[binds]
+q = quit
+c = center
+r = reset
+a = zoom actual
+```
+
+### Special Keys Wrapped in `<>`
+```ini
+[binds]
+<Left> = prev
+<Right> = next
+<Up> = zoom 1
+<Down> = zoom -1
+<space> = toggle_playing
+<period> = next_frame
+<bracketleft> = prev
+<bracketright> = next
+```
+
+### Modifier Chords
+Combine keys with `Ctrl+`, `Shift+`, or `Alt+`:
+```ini
+[binds]
+<Ctrl+r> = rotate by 90
+<Shift+G> = goto -1
+<Shift+plus> = zoom 1
+<Shift+T> = slideshow -1
+```
+
+### Multi-Key Sequences (Trie Matching)
+Unframed matches multi-key sequences using an internal prefix trie:
+```ini
+[binds]
+# Press 'g' twice to go to the first image in playlist
+gg = goto 1
+
+# Two-key chords
+<Ctrl+x>c = close all
+```
+
+### Compound Command Chaining
+Separate commands with a semicolon `;`:
+```ini
+[binds]
+# Move to next image, zoom to actual size, and center
+n = next; zoom actual; center
+```
 
 ---
 
-## 3. Suppressing Default Bindings
+## 3. Disabling Default Keybindings
 
-By default, Unframed loads standard default bindings. If you prefer to define a completely clean, custom keymap without default fallbacks, set `suppress_default_binds = true` in the `[options]` section:
+To build an entirely custom key mapping from scratch, disable built-in binds in `[options]`:
 
 ```ini
 [options]
@@ -66,49 +89,19 @@ suppress_default_binds = true
 
 [binds]
 q = quit
-<Left> = prev
-<Right> = next
+h = pan -50 0
+j = pan 0 -50
+k = pan 0 50
+l = pan 50 0
 ```
 
 ---
 
-## 4. Defining Command Aliases in `[aliases]`
+## 4. Testing Keybindings Interactively
 
-You can create convenient aliases for frequently used commands in the `[aliases]` section:
+You can test bindings dynamically in a running instance via the `:` prompt:
 
-```ini
-[aliases]
-q = quit
-n = next
-p = prev
-z = zoom
-fit = scaling full
-pixel = upscaling nearest_neighbour
+```text
+:bind p exec echo $ufm_current_file
+:alias wall exec swww img "$ufm_current_file"
 ```
-
-When you type `:fit` in the command console or run an IPC command `unframed-msg $PID fit`, Unframed automatically expands the alias to `scaling full`.
-
----
-
-## 5. Modifying Keybindings Dynamically at Runtime
-
-You can add or update keybindings on the fly without restarting Unframed, using the `:bind` command in the interactive console or via IPC:
-
-```bash
-# Map F to fullscreen dynamically
-:bind f fullscreen
-
-# Map a custom shell command to p
-:bind p exec echo $imv_current_file
-
-# Create a dynamic alias
-:alias wall exec feh --bg-fill "$imv_current_file"
-```
-
----
-
-## Next Steps
-
-- **[IPC Scripting & Automation](ipc-scripting-and-automation.md)**: Send commands remotely from scripts or window managers.
-- **[Configuration Reference](../reference/configuration.md)**: Full specification of all available ini options.
-- **[Command Reference](../reference/commands.md)**: Full list of supported commands and parameters.

@@ -1,17 +1,15 @@
-# Reference
+# Reference Documentation
 
-Comprehensive specifications, API schemas, and technical references for **Unframed**. These documents describe exact formats, options, and behaviors without tutorial narrative.
+This section provides authoritative, comprehensive specifications for Unframed's CLI flags, command syntax, configuration schemas, and protocols.
 
 ---
 
 ## Technical Specifications
 
-| Reference | Contents |
+| Document | Scope |
 | :--- | :--- |
-| [CLI Options](cli.md) | Full command-line interface flags, positional arguments, standard input piping, and exit status. |
-| [Command Surface](commands.md) | Built-in commands, arguments, return semantics, default aliases, and execution lifecycle. |
-| [Configuration Format](configuration.md) | Structure of `imv`-compatible INI files, section definitions (`[options]`, `[aliases]`, `[binds]`), search precedence, and color schemas. |
-| [IPC Protocol](ipc-protocol.md) | Wire protocol, UNIX domain socket paths, message framing, environment variable contracts, and client usage. |
-| [Format Support](format-support.md) | Supported vector and raster formats, Netpbm family parsing rules, animated multi-frame specifications, and limitations. |
-
-For architectural discussions and design rationale, consult the [Explanation](../explanation/index.md) section.
+| [CLI Reference](cli.md) | Command-line flags and argument syntax for `ufm` and `ufm-msg`. |
+| [Command Index](commands.md) | All built-in console commands, arguments, and execution semantics. |
+| [Configuration Format](configuration.md) | Structure of INI files, section definitions (`[options]`, `[aliases]`, `[binds]`), search precedence, and color schemas. |
+| [Supported Formats](supported-formats.md) | Vector, Netpbm, animated, and standard raster format compatibility matrix. |
+| [IPC Protocol](ipc-protocol.md) | UNIX domain socket listener contract, wire payloads, and command framing. |

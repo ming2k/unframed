@@ -1,4 +1,4 @@
-//! Configuration file parsing for imv/unframed ini format.
+//! Configuration file parsing for ufm/unframed ini format.
 
 use std::collections::HashMap;
 use std::env;
@@ -53,7 +53,7 @@ impl Default for Config {
             loop_input: true,
             overlay_enabled: false,
             overlay_font: "Monospace:24".to_string(),
-            overlay_text: "[${imv_current_index}/${imv_file_count}] [${imv_width}x${imv_height}] [${imv_scale}%] $imv_current_file [$imv_scaling_mode]".to_string(),
+            overlay_text: "[${ufm_current_index}/${ufm_file_count}] [${ufm_width}x${ufm_height}] [${ufm_scale}%] $ufm_current_file [$ufm_scaling_mode]".to_string(),
             overlay_text_color: 0xFFFFFFFF, // white
             overlay_bg_color: 0xC3000000,   // semi-transparent black
             overlay_position_bottom: false,
@@ -61,7 +61,7 @@ impl Default for Config {
             scaling_mode: ScalingMode::Full,
             slideshow_duration: 0.0,
             suppress_default_binds: false,
-            title_text: "unframed - [${imv_current_index}/${imv_file_count}] [${imv_width}x${imv_height}] [${imv_scale}%] $imv_current_file [$imv_scaling_mode]".to_string(),
+            title_text: "ufm - [${ufm_current_index}/${ufm_file_count}] [${ufm_width}x${ufm_height}] [${ufm_scale}%] $ufm_current_file [$ufm_scaling_mode]".to_string(),
             upscaling_method: UpscalingMethod::Linear,
 
             aliases: HashMap::new(),
@@ -90,7 +90,7 @@ pub fn pack_flux_color(r: u8, g: u8, b: u8, a: u8) -> u32 {
 }
 
 pub fn find_config_file() -> Option<PathBuf> {
-    if let Ok(path) = env::var("imv_config").or_else(|_| env::var("unframed_config")) {
+    if let Ok(path) = env::var("ufm_config").or_else(|_| env::var("unframed_config")) {
         let p = PathBuf::from(path);
         if p.is_file() {
             return Some(p);
@@ -100,20 +100,20 @@ pub fn find_config_file() -> Option<PathBuf> {
     let mut candidates = Vec::new();
 
     if let Ok(xdg) = env::var("XDG_CONFIG_HOME") {
-        candidates.push(PathBuf::from(xdg.clone()).join("unframed/config"));
-        candidates.push(PathBuf::from(xdg).join("imv/config"));
+        candidates.push(PathBuf::from(xdg.clone()).join("ufm/config"));
+        candidates.push(PathBuf::from(xdg).join("unframed/config"));
     }
 
     if let Ok(home) = env::var("HOME") {
         let home_p = PathBuf::from(home);
+        candidates.push(home_p.join(".config/ufm/config"));
         candidates.push(home_p.join(".config/unframed/config"));
-        candidates.push(home_p.join(".config/imv/config"));
+        candidates.push(home_p.join(".ufm_config"));
         candidates.push(home_p.join(".unframed_config"));
-        candidates.push(home_p.join(".imv_config"));
     }
 
-    candidates.push(PathBuf::from("/usr/local/etc/imv_config"));
-    candidates.push(PathBuf::from("/etc/imv_config"));
+    candidates.push(PathBuf::from("/etc/ufm/config"));
+    candidates.push(PathBuf::from("/usr/local/etc/ufm/config"));
 
     candidates.into_iter().find(|p| p.is_file())
 }

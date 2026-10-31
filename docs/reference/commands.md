@@ -1,164 +1,56 @@
-# Command Reference
+# Interactive Commands Reference
 
-This document provides the reference for all built-in commands supported by the Unframed interactive console (`:`) and the IPC control channel (`unframed-msg` / `imv-msg`).
+This document provides the reference for all built-in commands supported by the Unframed interactive console (`:`) and the IPC control channel (`ufm-msg`).
+
+Commands can be typed interactively after pressing `:`, triggered by keybindings in `~/.config/ufm/config`, executed via CLI flags (`-c`), or sent over UNIX domain sockets.
 
 ---
 
 ## 1. Command Syntax & Argument Parsing
 
-Commands are parsed according to standard shell word-splitting rules (`src/commands.rs`):
-- Arguments separated by whitespace.
-- Single quotes (`'...'`) and double quotes (`"..."`) preserve whitespace.
-- Backslash (`\`) escapes literal characters.
+- Command arguments are separated by whitespace.
+- Quotes (single `'...'` and double `"..."`) preserve whitespace within arguments.
+- Backslash `\` escapes literal quotes and delimiters.
+- Multiple commands can be chained using semicolon `;` delimiters (e.g. `next; zoom actual`).
 
 ---
 
-## 2. Built-in Commands
+## 2. Command Index
 
-| Command | Arguments | Summary |
+| Command | Arguments | Description |
 | :--- | :--- | :--- |
-| `quit` | None | Exit Unframed and terminate the window process. |
-| `close` | `[index \| all]` | Close the current image, a specific 1-based index, or all open images. |
-| `next` | `[offset]` | Advance forward by `offset` images (default: `1`). |
-| `prev` | `[offset]` | Advance backward by `offset` images (default: `1`). |
-| `goto` | `<index>` | Jump to 1-based index (`1` = first image, `-1` = last image). |
-| `zoom` | `<amount \| actual>` | Multiply zoom factor by `amount`, or reset zoom to 100% (`actual`). |
-| `pan` | `<dx> <dy>` | Translate the viewport by `<dx>` horizontal and `<dy>` vertical pixels. |
-| `rotate` | `<to \| by> <angle>` | Rotate image: `to <angle>` sets absolute orientation, `by <angle>` adds delta. |
-| `flip` | `<horizontal \| vertical>` | Mirror image across the specified axis. |
-| `open` | `[-r] <paths...>` | Load additional files or directories into playlist (`-r` for recursive scan). |
-| `fullscreen` | None | Toggle between windowed and fullscreen display. |
-| `overlay` | None | Toggle visibility of the OSD overlay. |
-| `center` | None | Recenter the image within the window boundaries. |
-| `reset` | None | Reset viewport scale, rotation, mirroring, and panning to default state. |
-| `next_frame` | None | Advance exactly one frame in multi-frame animated images (GIF/WebP). |
-| `toggle_playing` | None | Pause or resume multi-frame animation playback. |
-| `scaling` | `[none \| shrink \| full \| crop \| next]` | Set scaling mode, or cycle to next mode if omitted or `next`. |
-| `upscaling` | `[linear \| nearest_neighbour \| next]` | Set upscaling filter, or cycle to next if omitted or `next`. |
-| `slideshow` | `<+val \| -val \| duration>` | Increase (`+N`), decrease (`-N`), or set exact slideshow duration in seconds. |
-| `background` | `<checks \| hex>` | Set background to transparency checkerboard (`checks`) or 6-digit hex color. |
-| `bind` | `<keys> <command>` | Bind a key sequence or chord dynamically at runtime. |
-| `alias` | `<name> <command>` | Register a command alias dynamically at runtime. |
-| `exec` | `<shell command>` | Execute an asynchronous shell command with populated `$imv_*` variables. |
+| `quit` | | Exit `ufm`. Aliased to `q`. |
+| `close` | `[index\|all]` | Close current image, image at 1-based index, or all images. Aliased to `x`. |
+| `next` | `[offset]` | Advance forward in playlist by offset items (default: 1). Aliased to `n`. |
+| `prev` | `[offset]` | Step backward in playlist by offset items (default: 1). Aliased to `p`. |
+| `goto` | `<index>` | Jump to 1-based index (1 = first, -1 = last). Aliased to `g`. |
+| `open` | `[-r] <paths...>`| Append image paths or directories to playlist. Aliased to `o`. |
+| `zoom` | `<amount\|actual>`| Zoom by logarithmic step (`pow(1.04, amount)`) or reset to 100% with `actual`. Aliased to `z`. |
+| `pan` | `<dx> <dy>` | Translate image viewport by `dx` and `dy` pixels. |
+| `center`| | Re-center image within current viewport geometry. Aliased to `c`. |
+| `reset` | | Reset pan offset, rotation, and zoom back to default mode. Aliased to `r`. |
+| `rotate`| `<to\|by> <deg>`| Rotate clockwise by degrees (`by`) or set absolute rotation (`to`). |
+| `flip` | `<horizontal\|vertical>` | Mirror image across vertical or horizontal axis. |
+| `scaling`| `<none\|shrink\|full\|crop\|next>` | Set viewport scaling mode or cycle to next. Aliased to `s`. |
+| `upscaling`| `<linear\|nearest_neighbour\|next>` | Set sampling filter or toggle between smooth and pixelated. Aliased to `S`. |
+| `fullscreen`| | Toggle Wayland window fullscreen state. Aliased to `f`. |
+| `overlay`| | Toggle visibility of OSD metrics banner. Aliased to `d`. |
+| `slideshow`| `<+amount\|-amount\|duration>` | Adjust slideshow timer or set interval directly. Aliased to `ss`. |
+| `background`| `<checks\|hex>` | Set background to transparency checkerboard or hex color code. Aliased to `bg`. |
+| `next_frame`| | Advance one frame in animated GIF or WebP. |
+| `toggle_playing`| | Pause or resume animated playback. |
+| `exec` | `<shell command>` | Execute an asynchronous shell command with populated `$ufm_*` variables. |
+| `bind` | `<keys> <command>`| Dynamically register or override a key sequence mapping. |
+| `alias` | `<alias> <command>`| Register a command shortcut alias. |
 
 ---
 
-## 3. Command Details & Examples
+## 3. Shell Execution (`exec`)
 
-### `quit`
-Exits the application immediately, closing the Wayland window and cleaning up IPC sockets.
+Executes `<command>` inside `/bin/sh -c "<command>"` asynchronously in a detached worker thread. Populates environment variables `$ufm_current_file`, `$ufm_width`, `$ufm_height`, `$ufm_scale`, etc.
+
+### Examples
 ```text
-quit
+exec wl-copy "$ufm_current_file"
+exec notify-send "Image" "$ufm_current_file (${ufm_width}x${ufm_height})"
 ```
-
-### `close [index | all]`
-Closes images in the playlist.
-```text
-close        # Closes current image, advances to next
-close 3      # Closes the 3rd image in playlist
-close all    # Empties playlist completely
-```
-
-### `next` and `prev`
-Navigates the playlist relatively.
-```text
-next         # Next image (+1)
-next 5       # Skip forward 5 images
-prev         # Previous image (-1)
-prev 2       # Skip back 2 images
-```
-
-### `goto <index>`
-Jumps directly to a specific 1-based playlist index.
-```text
-goto 1       # Jump to first image
-goto 10      # Jump to 10th image
-goto -1      # Jump to last image in playlist
-```
-
-### `zoom <amount | actual>`
-Scales the current view.
-```text
-zoom 2       # Zoom in by factor of 2
-zoom -1      # Zoom out
-zoom actual  # Reset zoom factor to 100%
-```
-
-### `pan <dx> <dy>`
-Offsets the viewing center.
-```text
-pan 50 -50   # Pan 50 pixels right, 50 pixels up
-```
-
-### `rotate <to | by> <angle>`
-Rotates the rendered image. Angle is parsed in degrees and normalized to multiples of 90.
-```text
-rotate by 90    # Rotate 90 degrees clockwise
-rotate to 180   # Orient image to exactly 180 degrees
-```
-
-### `flip <horizontal | vertical>`
-Toggles mirroring along the chosen axis.
-```text
-flip horizontal
-flip vertical
-```
-
-### `open [-r] <paths...>`
-Appends files to the running session.
-```text
-open ~/Pictures/photo.jpg
-open -r ~/Wallpapers
-```
-
-### `scaling [mode]`
-Configures the viewport fit algorithm:
-- `none`: 1:1 natural pixel scaling.
-- `shrink`: Only downscale if the image exceeds window dimensions.
-- `full`: Scale image to fit within window bounds (maintaining aspect ratio).
-- `crop`: Scale image to cover entire window, cropping overflowing borders.
-- `next`: Cycle to the next mode in sequence.
-```text
-scaling full
-scaling next
-```
-
-### `upscaling [method]`
-Configures the Vulkan texture sampling filter:
-- `linear`: Bilinear hardware filtering for smooth photographic scaling.
-- `nearest_neighbour`: Point sampling for sharp pixel art.
-- `next`: Toggle between linear and nearest neighbour.
-```text
-upscaling nearest_neighbour
-upscaling next
-```
-
-### `exec <command>`
-Executes `<command>` inside `/bin/sh -c "<command>"` asynchronously in a detached worker thread. Populates environment variables `$imv_current_file`, `$imv_width`, `$imv_height`, `$imv_scale`, etc.
-```text
-exec wl-copy "$imv_current_file"
-exec notify-send "Image" "$imv_current_file (${imv_width}x${imv_height})"
-```
-
----
-
-## 4. Default Aliases
-
-Unframed initializes the following default aliases on startup (`src/commands.rs`):
-
-| Alias | Target Command |
-| :--- | :--- |
-| `q` | `quit` |
-| `n` | `next` |
-| `p` | `prev` |
-| `g` | `goto` |
-| `z` | `zoom` |
-| `o` | `open` |
-| `f` | `fullscreen` |
-| `d` | `overlay` |
-| `c` | `center` |
-| `r` | `reset` |
-| `s` | `scaling` |
-| `S` | `upscaling` |
-| `ss` | `slideshow` |
-| `bg` | `background` |

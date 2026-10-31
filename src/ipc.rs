@@ -1,4 +1,4 @@
-//! Inter-Process Communication via UNIX domain sockets, matching imv-msg.
+//! Inter-Process Communication via UNIX domain sockets for ufm.
 
 use std::env;
 use std::fs;
@@ -18,7 +18,6 @@ pub fn get_socket_paths(pid: u32) -> Vec<PathBuf> {
     let mut paths = Vec::new();
     for d in dirs {
         paths.push(d.join(format!("ufm-{pid}.sock")));
-        paths.push(d.join(format!("imv-{pid}.sock")));
         paths.push(d.join(format!("unframed-{pid}.sock")));
     }
     paths
