@@ -207,6 +207,15 @@ fn test_app_full_command_suite() {
     app.execute_command("background checks");
     assert_eq!(app.config.background, BackgroundMode::Checks);
 
+    app.execute_command("transparency next");
+    assert_eq!(app.config.transparency_grid, TransparencyGrid::ChecksDark);
+    app.execute_command("trans white");
+    assert_eq!(app.config.transparency_grid, TransparencyGrid::SolidWhite);
+    app.execute_command("trans off");
+    assert_eq!(app.config.transparency_grid, TransparencyGrid::Off);
+    app.execute_command("trans checks-light");
+    assert_eq!(app.config.transparency_grid, TransparencyGrid::ChecksLight);
+
     app.execute_command("alias mynext next");
     app.execute_command("mynext");
     assert_eq!(app.navigator.index(), 0);
@@ -218,4 +227,62 @@ fn test_app_full_command_suite() {
     assert_eq!(app.navigator.len(), 0);
 
     let _ = fs::remove_dir_all(&temp_dir);
+}
+
+#[test]
+fn test_transparent_gif_and_backing_pipeline() {
+    // 1. Generate an animated GIF with transparent pixels (Rgba [0,0,0,0])
+    let mut gif_bytes = Vec::new();
+    {
+        let mut encoder = GifEncoder::new(&mut gif_bytes);
+        // Frame 1: Top-left transparent, bottom-right opaque red
+        let mut f1_img = RgbaImage::new(2, 2);
+        f1_img.put_pixel(0, 0, image::Rgba([0, 0, 0, 0]));
+        f1_img.put_pixel(1, 1, image::Rgba([255, 0, 0, 255]));
+        // Frame 2: Top-left transparent, bottom-right opaque blue
+        let mut f2_img = RgbaImage::new(2, 2);
+        f2_img.put_pixel(0, 0, image::Rgba([0, 0, 0, 0]));
+        f2_img.put_pixel(1, 1, image::Rgba([0, 0, 255, 255]));
+
+        encoder.encode_frame(Frame::from_parts(f1_img, 0, 0, Delay::from_numer_denom_ms(40, 1))).unwrap();
+        encoder.encode_frame(Frame::from_parts(f2_img, 0, 0, Delay::from_numer_denom_ms(40, 1))).unwrap();
+    }
+
+    let loaded = load_image_from_bytes(&gif_bytes, Some("test_trans.gif")).expect("decode transparent gif");
+    assert_eq!(loaded.frames.len(), 2);
+    // Transparent pixel premultiplied check: alpha == 0 => rgba is 0
+    assert_eq!(&loaded.frames[0].rgba[0..4], &[0, 0, 0, 0]);
+
+    // 2. Setup App with default config (TransparencyGrid::ChecksLight)
+    let config = Config::default();
+    assert_eq!(config.transparency_grid, TransparencyGrid::ChecksLight);
+
+    let mut app = App::new(config, vec![], None, vec![], vec![]);
+    app.current_image = Some(loaded);
+
+    // Verify overlay variable expansion includes $ufm_transparency
+    let overlay = app.format_overlay_text("backing: $ufm_transparency");
+    assert_eq!(overlay, "backing: checks-light");
+
+    // Key sequence 'b' dispatches "transparency next"
+    if let unframed::binds::BindAction::Execute(cmds) = app.binds.handle_key("b") {
+        for cmd in cmds {
+            app.execute_command(&cmd);
+        }
+    }
+    assert_eq!(app.config.transparency_grid, TransparencyGrid::ChecksDark);
+    assert_eq!(app.format_overlay_text("$ufm_transparency"), "checks-dark");
+
+    // Cycle through all modes
+    app.execute_command("trans next");
+    assert_eq!(app.config.transparency_grid, TransparencyGrid::SolidWhite);
+
+    app.execute_command("trans next");
+    assert_eq!(app.config.transparency_grid, TransparencyGrid::SolidBlack);
+
+    app.execute_command("trans next");
+    assert_eq!(app.config.transparency_grid, TransparencyGrid::Off);
+
+    app.execute_command("trans next");
+    assert_eq!(app.config.transparency_grid, TransparencyGrid::ChecksLight);
 }
