@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=unframed
+Name=ufm
 GenericName=Image Viewer
 Comment=Modern Wayland image viewer powered by Optics
-Exec=unframed %F
+Exec=ufm %F
 Terminal=false
 Type=Application
 Categories=Graphics;2DGraphics;Viewer;

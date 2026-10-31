@@ -1,0 +1,3 @@
+fn main() {
+    unframed::run();
+}

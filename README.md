@@ -1,4 +1,6 @@
-# unframed
+# unframed (`ufm`)
+
+[English](README.md) | [简体中文](README-zh.md)
 
 An ultra-fast, modern, Wayland-native image viewer written in Rust, powered by the **Optics** (`iris` + `flux` + `lens`) graphics stack and designed as an evolution of **`imv`**.
 
@@ -23,8 +25,8 @@ An ultra-fast, modern, Wayland-native image viewer written in Rust, powered by t
   - Clockwise rotation (`rotate by 90`) and horizontal / vertical mirroring (`flip`).
 - **Interactive Console & Scriptable IPC**:
   - Interactive `:` command console with history navigation, line editing, and tab completion.
-  - Full IPC over UNIX domain sockets compatible with `imv-msg` (`$XDG_RUNTIME_DIR/imv-$PID.sock` and `unframed-$PID.sock`).
-  - Companion CLI tools: `unframed-msg` and `imv-msg`.
+  - Full IPC over UNIX domain sockets compatible with `imv-msg` (`$XDG_RUNTIME_DIR/ufm-$PID.sock` and `imv-$PID.sock`).
+  - Companion CLI tools: `ufm-msg` and `imv-msg`.
 - **Keyboard Sequences & Configuration**:
   - Trie-based keybinding engine supporting multi-key chords (`gg`, `<Shift+G>`, `<Ctrl+r>`, `<bracketleft>`, etc.).
   - Full ini configuration compatibility with `imv` (`[options]`, `[aliases]`, `[binds]`).
@@ -48,9 +50,9 @@ cargo build --release
 ```
 
 Binaries will be placed in `target/release/`:
-- `unframed`: Main image viewer
-- `unframed-msg`: IPC client utility
-- `imv-msg`: Backward-compatible IPC client utility
+- **`ufm`**: Main image viewer binary (aliased as `unframed`)
+- **`ufm-msg`**: Native IPC client utility
+- **`imv-msg`**: Backward-compatible IPC client utility
 
 ---
 
@@ -58,22 +60,22 @@ Binaries will be placed in `target/release/`:
 
 ```bash
 # Open one or more images
-unframed photo.jpg logo.svg graphic.ppm
+ufm photo.jpg logo.svg graphic.ppm
 
 # Open a directory recursively
-unframed -r ~/Pictures
+ufm -r ~/Pictures
 
 # Open via pipe / stdin
-find . -type f -name "*.svg" | unframed
+find . -type f -name "*.svg" | ufm
 
 # Stream an image directly from curl
-curl -sL https://example.com/sample.png | unframed -
+curl -sL https://example.com/sample.png | ufm -
 
 # Open fullscreen with chequered background
-unframed -f -b checks sample.png
+ufm -f -b checks sample.png
 
 # Slideshow mode: cycle images every 5 seconds
-unframed -t 5 ~/Wallpapers
+ufm -t 5 ~/Wallpapers
 ```
 
 ---
@@ -111,7 +113,7 @@ unframed -t 5 ~/Wallpapers
 
 Press `:` at any time to open the interactive command console. Supported commands include:
 
-- `quit`: Exit `unframed`.
+- `quit`: Exit `ufm`.
 - `next [offset]`: Go forward by `offset` images (default: 1).
 - `prev [offset]`: Go backward by `offset` images (default: 1).
 - `goto <index>`: Jump to 1-based index (e.g. `1` for first, `-1` for last).
@@ -137,35 +139,41 @@ Press `:` at any time to open the interactive command console. Supported command
 
 ## IPC Scripting
 
-`unframed` listens on `$XDG_RUNTIME_DIR/unframed-$PID.sock` and `$XDG_RUNTIME_DIR/imv-$PID.sock`.
+`ufm` listens on `$XDG_RUNTIME_DIR/ufm-$PID.sock` and `$XDG_RUNTIME_DIR/imv-$PID.sock`.
 
-You can control a running instance with `unframed-msg` or `imv-msg`:
+You can control a running instance with `ufm-msg` or `imv-msg`:
 
 ```bash
 # Next image
-unframed-msg $PID next
+ufm-msg $PID next
 
 # Zoom in
-unframed-msg $PID zoom 2
+ufm-msg $PID zoom 2
 
 # Rotate 90 degrees
-unframed-msg $PID rotate by 90
+ufm-msg $PID rotate by 90
 
 # Open new files
-unframed-msg $PID open ~/Pictures/new.svg
+ufm-msg $PID open ~/Pictures/new.svg
 ```
 
 ---
 
-## Configuration
+## Detailed Documentation Suite
 
-`unframed` searches for configuration in:
-1. `$unframed_config` or `$imv_config`
-2. `$XDG_CONFIG_HOME/unframed/config` or `$XDG_CONFIG_HOME/imv/config`
-3. `~/.config/unframed/config` or `~/.config/imv/config`
-4. `/etc/imv_config`
-
-See [`files/config`](files/config) for the reference configuration file.
+Refer to the in-depth documentation following the Diátaxis model:
+- [Getting Started Tutorial](docs/tutorials/getting-started.md)
+- [How-to: Custom Keybindings & Chords](docs/how-to/keybindings.md)
+- [How-to: Tiling WM & IPC Scripting](docs/how-to/scripting-and-ipc.md)
+- [Reference: CLI Parameters](docs/reference/cli.md)
+- [Reference: Interactive Commands](docs/reference/commands.md)
+- [Reference: Configuration File](docs/reference/configuration.md)
+- [Reference: Supported Formats](docs/reference/supported-formats.md)
+- [Explanation: Architecture Overview](docs/explanation/architecture-overview.md)
+- [Explanation: Wayland & Optics Pipeline](docs/explanation/wayland-optics-pipeline.md)
+- [Architecture Decision Records (ADRs)](docs/adr/0001-wayland-only-architecture-with-optics.md)
+- [Development & Subsystems Topology](docs/dev/subsystems.md)
+- [Development & Testing Strategy](docs/dev/testing.md)
 
 ---
 

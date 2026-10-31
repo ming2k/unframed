@@ -2,7 +2,7 @@
 name = "unframed"
 version = "0.1.0"
 edition = "2021"
-default-run = "unframed"
+default-run = "ufm"
 
 [dependencies]
 iris = { path = "../optics/bindings/iris-rs/crates/iris" }
@@ -16,8 +16,16 @@ name = "unframed"
 path = "src/lib.rs"
 
 [[bin]]
-name = "unframed"
+name = "ufm"
 path = "src/main.rs"
+
+[[bin]]
+name = "unframed"
+path = "src/bin/unframed.rs"
+
+[[bin]]
+name = "ufm-msg"
+path = "src/bin/ufm_msg.rs"
 
 [[bin]]
 name = "unframed-msg"
