@@ -191,15 +191,8 @@ pub fn run() {
         }
     }
 
-    // Initial window configuration
-    let iris_cfg = iris::Config::new(&config.title_text)
-        .expect("Valid window title")
-        .app_id(&app_id)
-        .expect("Valid app ID")
-        .size(config.width, config.height);
-
     let app = Rc::new(RefCell::new(App::new(
-        config,
+        config.clone(),
         paths,
         stdin_data,
         startup_commands,
@@ -216,6 +209,15 @@ pub fn run() {
         }
         app_mut.reload_current_image();
     }
+
+    let initial_title = app.borrow().format_overlay_text(&config.title_text);
+
+    // Initial window configuration
+    let iris_cfg = iris::Config::new(&initial_title)
+        .expect("Valid window title")
+        .app_id(&app_id)
+        .expect("Valid app ID")
+        .size(config.width, config.height);
 
     let app_build = Rc::clone(&app);
     let app_paint = Rc::clone(&app);
