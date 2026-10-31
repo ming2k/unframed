@@ -55,3 +55,9 @@ The test suite contains **34 automated tests** covering every critical subsystem
 
 ### IPC Communication Tests
 - `test_ipc_roundtrip`: Spawns a real UNIX domain socket listener, connects via client stream, and verifies command delivery across threads.
+
+---
+
+## 3. Manual Testing & Exploratory Runbooks
+
+For end-to-end interactive verification, visual inspection, and Wayland compositor testing playbooks, consult the [Manual Testing & Full-Stack Verification Guide](manual-testing.md).

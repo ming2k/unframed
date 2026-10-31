@@ -173,6 +173,7 @@ Refer to the in-depth documentation following the Diátaxis model:
 - [Architecture Decision Records (ADRs)](docs/adr/0001-wayland-only-architecture-with-optics.md)
 - [Development & Subsystems Topology](docs/dev/subsystems.md)
 - [Development & Testing Strategy](docs/dev/testing.md)
+- [Manual Testing & Verification Runbook](docs/dev/manual-testing.md)
 
 ---
 

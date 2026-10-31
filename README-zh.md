@@ -183,6 +183,7 @@ ufm-msg $PID open ~/Pictures/new.svg
 - [架构决策记录 (ADR)](docs/adr/0001-wayland-only-architecture-with-optics.md)
 - [子系统拓扑 (Dev)](docs/dev/subsystems.md)
 - [测试验证指南 (Dev)](docs/dev/testing.md)
+- [手动端到端测试手册 (Manual Testing)](docs/dev/manual-testing.md)
 
 ---
 
