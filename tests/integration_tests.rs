@@ -2,7 +2,7 @@ use std::fs::{self, File};
 use image::codecs::gif::GifEncoder;
 use image::{Delay, Frame, RgbaImage};
 use unframed::app::App;
-use unframed::config::{BackgroundMode, Config};
+use unframed::config::{BackgroundMode, Config, TransparencyGrid};
 use unframed::image_loader::load_image_from_bytes;
 use unframed::navigator::Navigator;
 use unframed::ppm::parse_pnm;

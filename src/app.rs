@@ -11,12 +11,29 @@ use lens::{key, mods, Color};
 
 use crate::binds::{lens_key_to_string, BindAction, Binds};
 use crate::commands::{default_aliases, split_words};
-use crate::config::{BackgroundMode, Config};
+use crate::config::{BackgroundMode, Config, TransparencyGrid};
 use crate::console::Console;
 use crate::image_loader::{load_image_from_bytes, load_image_from_path, LoadedImage};
 use crate::ipc::IpcServer;
 use crate::navigator::Navigator;
 use crate::viewport::{ScalingMode, UpscalingMethod, Viewport, ZoomSource};
+
+fn draw_checkerboard(canvas: &flux::CanvasCommands<'_>, w: f32, h: f32, tile_size: f32, c1: u32, c2: u32) {
+    canvas.fill_rect(0.0, 0.0, w, h, c1);
+    let mut y = 0.0f32;
+    let mut row = 0;
+    while y < h {
+        let block_h = tile_size.min(h - y);
+        let mut x = if row % 2 == 0 { 0.0f32 } else { tile_size };
+        while x < w {
+            let block_w = tile_size.min(w - x);
+            canvas.fill_rect(x, y, block_w, block_h, c2);
+            x += tile_size * 2.0;
+        }
+        y += tile_size;
+        row += 1;
+    }
+}
 
 pub struct App {
     pub config: Config,
@@ -326,6 +343,17 @@ impl App {
                     } else if let Some(c) = crate::config::parse_hex_color(arg, 255) {
                         self.config.background = BackgroundMode::Solid(c);
                     }
+                }
+            }
+            "transparency" => {
+                if let Some(arg) = args.first() {
+                    if arg.eq_ignore_ascii_case("next") {
+                        self.config.transparency_grid = self.config.transparency_grid.next();
+                    } else if let Some(mode) = TransparencyGrid::parse(arg) {
+                        self.config.transparency_grid = mode;
+                    }
+                } else {
+                    self.config.transparency_grid = self.config.transparency_grid.next();
                 }
             }
             "bind" => {
@@ -744,23 +772,7 @@ impl App {
                 canvas.fill_rect(0.0, 0.0, win_w, win_h, col);
             }
             BackgroundMode::Checks => {
-                let tile_size = 24.0;
-                let c1 = 0xFF2A2A2A;
-                let c2 = 0xFF3D3D3D;
-                canvas.fill_rect(0.0, 0.0, win_w, win_h, c1);
-                let mut y = 0.0;
-                let mut row = 0;
-                while y < win_h {
-                    let mut x = if row % 2 == 0 { 0.0 } else { tile_size };
-                    while x < win_w {
-                        let w = tile_size.min(win_w - x);
-                        let h = tile_size.min(win_h - y);
-                        canvas.fill_rect(x, y, w, h, c2);
-                        x += tile_size * 2.0;
-                    }
-                    y += tile_size;
-                    row += 1;
-                }
+                draw_checkerboard(&canvas, win_w, win_h, 24.0, 0xFF202020, 0xFF363636);
             }
         }
 
@@ -782,6 +794,25 @@ impl App {
             }
 
             canvas.translate(-scaled_w * 0.5, -scaled_h * 0.5);
+
+            // Draw image-bound transparency grid if enabled
+            match self.config.transparency_grid {
+                TransparencyGrid::ChecksLight => {
+                    // Classic Photoshop light checkerboard (#FFFFFF and #CCCCCC)
+                    draw_checkerboard(&canvas, scaled_w, scaled_h, 16.0, 0xFFFFFFFF, 0xFFCCCCCC);
+                }
+                TransparencyGrid::ChecksDark => {
+                    // Modern dark mode checkerboard (#202020 and #383838)
+                    draw_checkerboard(&canvas, scaled_w, scaled_h, 16.0, 0xFF202020, 0xFF383838);
+                }
+                TransparencyGrid::SolidWhite => {
+                    canvas.fill_rect(0.0, 0.0, scaled_w, scaled_h, 0xFFFFFFFF);
+                }
+                TransparencyGrid::SolidBlack => {
+                    canvas.fill_rect(0.0, 0.0, scaled_w, scaled_h, 0xFF000000);
+                }
+                TransparencyGrid::Off => {}
+            }
 
             let sampler = if self.viewport.upscaling_method == UpscalingMethod::NearestNeighbour {
                 self.nearest_sampler.as_ref()
@@ -978,11 +1009,22 @@ impl App {
         }
     }
 
+    pub fn cycle_transparency(&mut self) {
+        self.config.transparency_grid = self.config.transparency_grid.next();
+        self.needs_redraw = true;
+    }
+
+    pub fn set_transparency(&mut self, mode: TransparencyGrid) {
+        self.config.transparency_grid = mode;
+        self.needs_redraw = true;
+    }
+
     pub fn get_env_vars(&self) -> Vec<(&'static str, String)> {
         let pid = std::process::id().to_string();
         let cur_file = self.navigator.selection().unwrap_or("").to_string();
         let scaling_mode = self.viewport.scaling_mode.as_str().to_string();
         let upscaling_method = self.viewport.upscaling_method.as_str().to_string();
+        let transparency = self.config.transparency_grid.name().to_string();
         let loading = if self.current_image.is_some() { "0" } else { "1" }.to_string();
         let cur_idx = if self.navigator.is_empty() {
             "0".to_string()
@@ -1011,6 +1053,7 @@ impl App {
             ("ufm_format", format_name),
             ("ufm_scaling_mode", scaling_mode),
             ("ufm_upscaling_method", upscaling_method),
+            ("ufm_transparency", transparency),
             ("ufm_loading", loading),
             ("ufm_current_index", cur_idx),
             ("ufm_file_count", file_count),
@@ -1054,6 +1097,15 @@ mod tests {
 
         app.execute_command("background checks");
         assert_eq!(app.config.background, BackgroundMode::Checks);
+
+        app.execute_command("transparency next");
+        assert_eq!(app.config.transparency_grid, TransparencyGrid::ChecksDark);
+        app.execute_command("transparency white");
+        assert_eq!(app.config.transparency_grid, TransparencyGrid::SolidWhite);
+        app.execute_command("transparency off");
+        assert_eq!(app.config.transparency_grid, TransparencyGrid::Off);
+        app.execute_command("transparency checks-light");
+        assert_eq!(app.config.transparency_grid, TransparencyGrid::ChecksLight);
     }
 
     #[test]

@@ -1,7 +1,5 @@
 # unframed (`ufm`)
 
-[English](README.md) | [简体中文](README-zh.md)
-
 An ultra-fast, modern, Wayland-native image viewer written in Rust and powered by the **Optics** (`iris` + `flux` + `lens`) graphics stack.
 
 ---

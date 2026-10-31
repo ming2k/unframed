@@ -21,7 +21,7 @@ pub mod svg;
 pub mod viewport;
 
 use app::App;
-use config::{find_config_file, parse_hex_color, BackgroundMode, Config};
+use config::{find_config_file, parse_hex_color, BackgroundMode, Config, TransparencyGrid};
 use viewport::{ScalingMode, UpscalingMethod};
 
 pub const VERSION: &str = "0.1.0";
@@ -37,6 +37,7 @@ Options:
   -h                         Show this help message and quit
   -v                         Show version and quit
   -b <background>            Set background color (6-digit hex or 'checks')
+  -B <transparency>          Set image transparency grid (checks-light, checks-dark, white, black, off)
   -c <command>               Command to execute on launch (can be repeated)
   -C <command>               Command to execute on image change (can be repeated)
   -d                         Start with overlay visible
@@ -111,6 +112,12 @@ pub fn run() {
                 config.background = BackgroundMode::Checks;
             } else if let Some(c) = parse_hex_color(val, 255) {
                 config.background = BackgroundMode::Solid(c);
+            }
+        } else if (arg == "-B" || arg == "--transparency") && i + 1 < args.len() {
+            i += 1;
+            let val = &args[i];
+            if let Some(mode) = TransparencyGrid::parse(val) {
+                config.transparency_grid = mode;
             }
         } else if arg == "-c" && i + 1 < args.len() {
             i += 1;

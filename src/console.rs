@@ -41,6 +41,7 @@ impl Console {
             "upscaling".into(),
             "slideshow".into(),
             "background".into(),
+            "transparency".into(),
             "bind".into(),
             "alias".into(),
         ];

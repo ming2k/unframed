@@ -13,9 +13,59 @@ pub enum BackgroundMode {
     Checks,
 }
 
+/// Transparency grid and presentation mode for transparent image regions (GIF, WebP, PNG, SVG).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TransparencyGrid {
+    /// Classic Photoshop light checkerboard (#FFFFFF and #CCCCCC).
+    ChecksLight,
+    /// Modern dark theme checkerboard (#202020 and #383838).
+    ChecksDark,
+    /// Solid pure white backing within image bounds (#FFFFFFFF).
+    SolidWhite,
+    /// Solid pure black backing within image bounds (#FF000000).
+    SolidBlack,
+    /// Pass-through to window canvas (no backing behind image).
+    Off,
+}
+
+impl TransparencyGrid {
+    pub fn next(&self) -> Self {
+        match self {
+            Self::ChecksLight => Self::ChecksDark,
+            Self::ChecksDark => Self::SolidWhite,
+            Self::SolidWhite => Self::SolidBlack,
+            Self::SolidBlack => Self::Off,
+            Self::Off => Self::ChecksLight,
+        }
+    }
+
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::ChecksLight => "checks-light",
+            Self::ChecksDark => "checks-dark",
+            Self::SolidWhite => "solid-white",
+            Self::SolidBlack => "solid-black",
+            Self::Off => "off",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<Self> {
+        let lower = s.to_ascii_lowercase();
+        match lower.as_str() {
+            "checks" | "checks-light" | "light" | "checkerboard" | "ps" => Some(Self::ChecksLight),
+            "checks-dark" | "dark" => Some(Self::ChecksDark),
+            "white" | "solid-white" => Some(Self::SolidWhite),
+            "black" | "solid-black" => Some(Self::SolidBlack),
+            "off" | "none" | "window" => Some(Self::Off),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Config {
     pub background: BackgroundMode,
+    pub transparency_grid: TransparencyGrid,
     pub fullscreen: bool,
     pub width: i32,
     pub height: i32,
@@ -44,6 +94,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             background: BackgroundMode::Solid(0xFF000000), // black
+            transparency_grid: TransparencyGrid::ChecksLight,
             fullscreen: false,
             width: 1280,
             height: 720,
@@ -169,6 +220,11 @@ impl Config {
                     self.background = BackgroundMode::Solid(color);
                 }
             }
+            "transparency_grid" | "transparency" => {
+                if let Some(mode) = TransparencyGrid::parse(val) {
+                    self.transparency_grid = mode;
+                }
+            }
             "fullscreen" => {
                 self.fullscreen = parse_bool(val).unwrap_or(self.fullscreen);
             }
@@ -289,5 +345,36 @@ mod tests {
         assert!(cfg.overlay_enabled);
         assert_eq!(cfg.aliases.get("x").map(|s| s.as_str()), Some("close"));
         assert_eq!(cfg.binds.len(), 2);
+    }
+
+    #[test]
+    fn test_transparency_grid_parse_and_cycle() {
+        assert_eq!(TransparencyGrid::parse("checks-light"), Some(TransparencyGrid::ChecksLight));
+        assert_eq!(TransparencyGrid::parse("ps"), Some(TransparencyGrid::ChecksLight));
+        assert_eq!(TransparencyGrid::parse("checks-dark"), Some(TransparencyGrid::ChecksDark));
+        assert_eq!(TransparencyGrid::parse("white"), Some(TransparencyGrid::SolidWhite));
+        assert_eq!(TransparencyGrid::parse("black"), Some(TransparencyGrid::SolidBlack));
+        assert_eq!(TransparencyGrid::parse("off"), Some(TransparencyGrid::Off));
+        assert_eq!(TransparencyGrid::parse("invalid"), None);
+
+        let mut mode = TransparencyGrid::ChecksLight;
+        mode = mode.next();
+        assert_eq!(mode, TransparencyGrid::ChecksDark);
+        mode = mode.next();
+        assert_eq!(mode, TransparencyGrid::SolidWhite);
+        mode = mode.next();
+        assert_eq!(mode, TransparencyGrid::SolidBlack);
+        mode = mode.next();
+        assert_eq!(mode, TransparencyGrid::Off);
+        mode = mode.next();
+        assert_eq!(mode, TransparencyGrid::ChecksLight);
+
+        let ini = r#"
+        [options]
+        transparency_grid = checks-dark
+        "#;
+        let mut cfg = Config::default();
+        cfg.parse_ini(ini);
+        assert_eq!(cfg.transparency_grid, TransparencyGrid::ChecksDark);
     }
 }

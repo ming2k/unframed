@@ -17,6 +17,9 @@ upscaling_method = linear
 # Background: 6-digit hex color code or 'checks'
 background = 000000
 
+# Image transparency presentation: checks-light (Photoshop style), checks-dark, white, black, off
+transparency_grid = checks-light
+
 # Overlay initial visibility
 overlay = false
 
@@ -40,6 +43,7 @@ s = scaling
 S = upscaling
 ss = slideshow
 bg = background
+trans = transparency
 
 [binds]
 # Navigation
@@ -78,6 +82,7 @@ r = reset
 # Display & UI
 f = fullscreen
 d = overlay
+b = transparency next
 s = scaling next
 <Shift+S> = upscaling next
 p = exec echo $ufm_current_file

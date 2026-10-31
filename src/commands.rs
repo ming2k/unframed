@@ -18,6 +18,7 @@ pub fn default_aliases() -> HashMap<String, String> {
     aliases.insert("S".into(), "upscaling".into());
     aliases.insert("ss".into(), "slideshow".into());
     aliases.insert("bg".into(), "background".into());
+    aliases.insert("trans".into(), "transparency".into());
     aliases
 }
 

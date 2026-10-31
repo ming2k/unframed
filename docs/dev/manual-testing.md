@@ -1,229 +1,229 @@
-# ufm 实战测试与人工验证操作手册
+# ufm Hands-On Manual Testing & Verification Runbook
 
-本文档是 **Unframed (`ufm`)** 的**实战操作与人工验证指南**。完全抛弃空泛的测试条目，面向开发者、测试员或日常用户，按照真实使用场景编写了“手把手”可执行的实操动作、快捷键敲击步骤与可视化的预期效果。
+This runbook provides **practical, step-by-step hands-on testing procedures** for **Unframed (`ufm`)**. It avoids abstract testing checklists and instead provides concrete, executable shell commands, exact keypress interactions, and observable visual expectations for developers, QA engineers, and everyday users.
 
 ---
 
-## 0. 准备工作（30秒完成）
+## 0. Preparation (Ready in 30 Seconds)
 
-在开始实战测试前，先编译发布版本并生成测试图片样本：
+Before starting hands-on testing, build the release binary and generate sample test images:
 
 ```bash
-# 1. 编译 release 二进制
+# 1. Build release binaries
 cargo build --release
 
-# 2. 生成包含 SVG矢量、Netpbm(P1~P7)、动图GIF、透明PNG 的测试图片库
+# 2. Generate test image fixtures (SVG, Netpbm P1~P7, Animated GIF, Transparent PNG)
 ./tools/generate_test_fixtures.sh /tmp/ufm-fixtures
 
-# 3. 将二进制暴露在当前终端 PATH 中
+# 3. Add binaries to current PATH
 export PATH="$PWD/target/release:$PATH"
 ```
 
 ---
 
-## 实战 1：启动、OSD 状态栏与 SVG 矢量缩放
+## Practice 1: Launch, OSD Status Bar & Vector SVG Zooming
 
-### 操作步骤
-1. 终端执行：
+### Action Steps
+1. In your terminal, run:
    ```bash
    ufm -d /tmp/ufm-fixtures/vector_sample.svg
    ```
-2. **你会看到的效果**：
-   - 窗口弹出，黑色背景中央展示一张带有橙紫渐变圆形、青色圆角矩形和白色文字的 SVG 矢量图。
-   - 窗口顶端浮现半透明的黑底状态栏，清晰标出：`[1/1] [800x600] [100%] ...vector_sample.svg [full]`。
-3. **在窗口内进行交互**：
-   - 把鼠标指针悬停在画面中的文字或圆球边缘，**向上滚动鼠标滚轮**：
-     - *观察现象*：画面迅速放大（放大到 500% 以上），仔细观察文字和矢量几何图形边缘——**完全没有位图被放大的马赛克锯齿，依然如矢量般平滑锐利**！并且放大过程始终精确锚定在你的鼠标指针所在位置。
-   - 敲击键盘字母 **`a`**（Actual Size）：
-     - *观察现象*：图像立刻 1:1 恢复到原始物理尺寸。
-   - 敲击键盘字母 **`d`**（Display Overlay）：
-     - *观察现象*：顶部的状态信息栏隐去；再次按 **`d`**，状态栏重新弹出。
-   - 敲击键盘字母 **`q`**：窗口瞬间关闭，终端返回。
+2. **Visual Observation**:
+   - A window appears with a black background displaying an SVG vector graphic with an orange-to-purple gradient circle, a cyan rounded rectangle, and crisp white text.
+   - A semi-transparent black OSD status banner appears at the top:
+     `[1/1] [800x600] [100%] ...vector_sample.svg [full]`.
+3. **Interactive Testing**:
+   - Hover your mouse cursor over the text or circle edge and **scroll mouse wheel up**:
+     - *Observation*: The image zooms in rapidly past 500%. Inspect the edges—**there is zero pixelation or blurriness; vector paths remain perfectly crisp and sharp**! Notice that zoom anchors precisely on your mouse pointer.
+   - Press **`a`** (Actual size):
+     - *Observation*: Resets instantly to 100% 1:1 original physical dimensions.
+   - Press **`d`** (Display overlay):
+     - *Observation*: The top OSD status bar hides; press **`d`** again to toggle it back on.
+   - Press **`q`**: The window closes immediately and returns to your shell prompt.
 
 ---
 
-## 实战 2：多图连续切页、Netpbm（P1~P7）与快捷键序列
+## Practice 2: Multi-Image Browsing, Netpbm (P1~P7) & Vim Sequences
 
-### 操作步骤
-1. 终端执行（一次性载入多张不同格式的图片）：
+### Action Steps
+1. Launch with all Netpbm format samples:
    ```bash
    ufm /tmp/ufm-fixtures/sample_p*
    ```
-2. **在窗口内进行交互**：
-   - 按键盘右方向键 **`Right`** 或方括号 **`]`**：
-     - *观察现象*：顺畅翻到下一张图片（依次浏览 P1 纯黑白位图、P2 灰度渐变、P3 彩色像素块、P4 二进制黑白、P5 二进制灰度、P6 二进制三原色、P7 带有 Alpha 半透明通道的 PAM）。
-   - 按键盘左方向键 **`Left`** 或方括号 **`[`**：
-     - *观察现象*：向后翻页。翻到第一张后继续按左键，会自动循环回绕到最后一张。
-   - 连续快速敲击两次小写字母 **`gg`**（Vim 模式）：
-     - *观察现象*：瞬间跳回第 1 张图片！
-   - 按大写字母 **`Shift + G`**：
-     - *观察现象*：瞬间跳到最后 1 张图片！
-   - 按字母 **`x`**：
-     - *观察现象*：关闭当前正在看的这张图片，播放列表长度减 1，并自动切到下一张展示。
-   - 敲 **`q`** 退出。
+2. **Interactive Testing**:
+   - Press **`Right`** or **`]`**:
+     - *Observation*: Smoothly navigates to the next image (cycles through P1 1-bit bitmap, P2 grayscale ramp, P3 RGB colors, P4 binary bitmap, P5 binary grayscale, P6 binary RGB, and P7 PAM with alpha transparency).
+   - Press **`Left`** or **`[`**:
+     - *Observation*: Steps backward through the playlist. Wrapping past the first image cycles cleanly to the last item.
+   - Press **`gg`** (Double-tap 'g' in rapid succession):
+     - *Observation*: Jumps instantly to the very first image in the playlist!
+   - Press **`Shift + G`**:
+     - *Observation*: Jumps instantly to the last image in the playlist!
+   - Press **`x`**:
+     - *Observation*: Closes and removes the active image from the playlist, automatically advancing to the next remaining file.
+   - Press **`q`** to exit.
 
 ---
 
-## 实战 3：动图时间轴回放、暂停与单步前进（GIF / WebP）
+## Practice 3: Animation Timeline, Pausing & Single-Frame Stepping
 
-### 操作步骤
-1. 终端执行：
+### Action Steps
+1. Launch with the multi-frame animated GIF:
    ```bash
    ufm /tmp/ufm-fixtures/sample_animated.gif
    ```
-2. **你会看到的效果**：
-   - 图像在红绿两色方块之间自动、匀速、连续地交替跳动回放。
-3. **在窗口内进行交互**：
-   - 敲击键盘 **空格键（`Space`）**：
-     - *观察现象*：动画立即定格暂停！此时后台 GPU 立即进入极低功耗跳帧休眠模式。
-   - 敲击键盘句号键 **`.`**：
-     - *观察现象*：画面精准单步跳动了一帧！多次按 `.`，每敲一次前进一帧。
-   - 再次敲击 **空格键（`Space`）**：
-     - *观察现象*：动图恢复自动循环流畅播放。
-   - 敲 **`q`** 退出。
+2. **Visual Observation**:
+   - The graphic alternates continuously between red and green frames at the configured 50ms timeline interval.
+3. **Interactive Testing**:
+   - Press **`Space`**:
+     - *Observation*: The animation freezes instantly! The backend enters low-power idle mode immediately.
+   - Press **`.`** (Period):
+     - *Observation*: Advances forward by exactly one single frame while paused. Press **`.`** repeatedly to step frame-by-frame.
+   - Press **`Space`** again:
+     - *Observation*: Resumes continuous animated playback.
+   - Press **`q`** to exit.
 
 ---
 
-## 实战 4：鼠标平移、自由旋转与透明棋盘格背景
+## Practice 4: Mouse Pan Dragging, Rotation & Checkerboard Background
 
-### 操作步骤
-1. 终端执行（以透明棋盘格模式打开带有透明通道的 PNG）：
+### Action Steps
+1. Launch with a transparent PNG on a checkerboard background:
    ```bash
    ufm -b checks /tmp/ufm-fixtures/sample_transparent.png
    ```
-2. **你会看到的效果**：
-   - 图片周围与透明区域呈现专业制图软件常见的灰色两色交替棋盘方格。
-3. **在窗口内进行交互**：
-   - 按键盘 **`+`** 连续放大图片数倍。
-   - 按住 **鼠标左键不放并在窗口内随意拖动**：
-     - *观察现象*：图像 1:1 紧跟鼠标平滑拖拽平移，松手时停在拖拽位置。边缘具备阻尼防丢边界，不可能把图片拖出屏幕找不到。
-   - 按快捷键 **`Ctrl + r`**：
-     - *观察现象*：图像顺时针旋转 90 度；连续按 4 次完成 360 度一周旋转。
-   - 按字母 **`r`**（Reset）：
-     - *观察现象*：瞬间将旋转角度归零、位移居中、尺寸还原为窗口默认适应比例。
-   - 按字母 **`s`**：
-     - *观察现象*：循环切换缩放模式（`none` 原始物理像素 $\to$ `shrink` 缩小适应 $\to$ `full` 完全适应 $\to$ `crop` 充满并裁切）。
-   - 按 **`Shift + S`**：
-     - *观察现象*：切换插值采样算法（平滑双线性 `linear` 与 像素风清晰锐利 `nearest_neighbour` 之间实时切换）。
-   - 敲 **`q`** 退出。
+2. **Visual Observation**:
+   - Transparent regions show a clean alternating two-tone gray checkerboard pattern.
+3. **Interactive Testing**:
+   - Press **`+`** repeatedly to zoom in significantly.
+   - **Click and hold the left mouse button, then drag across the window**:
+     - *Observation*: The image tracks 1:1 with cursor displacement. Boundary damping prevents dragging the image out of sight.
+   - Press **`Ctrl + r`**:
+     - *Observation*: Rotates clockwise by 90 degrees. Pressing 4 times completes a 360-degree rotation.
+   - Press **`r`** (Reset):
+     - *Observation*: Instantly resets rotation to 0, centers the viewport, and rescales to window bounds.
+   - Press **`s`**:
+     - *Observation*: Cycles scaling modes: `none` (100%) -> `shrink` (scale down only) -> `full` (aspect fit) -> `crop` (fill window).
+   - Press **`Shift + S`**:
+     - *Observation*: Toggles sampling filter between `linear` (smooth bilinear interpolation) and `nearest_neighbour` (crisp pixel art).
+   - Press **`q`** to exit.
 
 ---
 
-## 实战 5：交互式命令行控制台（`:`）与 Tab 自动补全
+## Practice 5: Interactive Command Console (`:`) & Tab Completion
 
-### 操作步骤
-1. 终端执行：
+### Action Steps
+1. Launch an image:
    ```bash
    ufm /tmp/ufm-fixtures/vector_sample.svg
    ```
-2. **在窗口内进行交互**：
-   - 按键盘冒号键 **`:`**（美式键盘按 `Shift + ;`）：
-     - *观察现象*：窗口底部立刻弹出一根半透明深黑色的命令行控制台，带有提示符 `: `。
-   - 输入前缀 `scal`，然后按下键盘 **`Tab` 键**：
-     - *观察现象*：控制台自动把命令补全为 `scaling`！
-   - 继续在后面输入 ` crop` 并敲击回车 **`Enter`**：
-     - *观察现象*：控制台自动收起，图像立刻以 crop（充满裁剪）模式铺满整个窗口！
-   - 再次按冒号 **`:`** 打开控制台，按下 **键盘上方向键 `Up`**：
-     - *观察现象*：自动召回刚刚执行过的历史命令 `scaling crop`。
-   - 按 **`Escape`** 键：控制台无痕关闭，不执行任何操作。
-   - 敲 **`q`** 退出。
+2. **Interactive Testing**:
+   - Press **`:`** (On US keyboards, press `Shift + ;`):
+     - *Observation*: A sleek dark command prompt bar opens at the bottom displaying `: `.
+   - Type `scal`, then press **`Tab`**:
+     - *Observation*: The input automatically autocompletes to `scaling`!
+   - Complete the command with ` crop` and press **`Enter`**:
+     - *Observation*: The console closes, and the image instantly expands to fill the entire window in crop mode!
+   - Press **`:`** again and press **`Up` arrow**:
+     - *Observation*: Recalls the previous command `scaling crop` from command history.
+   - Press **`Escape`**:
+     - *Observation*: The console dismisses cleanly without executing.
+   - Press **`q`** to exit.
 
 ---
 
-## 实战 6：跨终端 IPC 远程控制（`ufm-msg`）
+## Practice 6: Multi-Terminal IPC Remote Control (`ufm-msg`)
 
-这是平铺窗口管理器（Sway / Hyprland）脚本自动化的核心体验。
+This exercises the scriptable automation pipeline used by tiling window managers (Sway, Hyprland).
 
-### 操作步骤
-1. 打开 **终端 1**，后台启动查看器并记录 PID：
+### Action Steps
+1. In **Terminal 1**, start the viewer in background and capture its PID:
    ```bash
    ufm /tmp/ufm-fixtures &
    UFM_PID=$!
-   echo "查看器正在运行，PID: $UFM_PID"
+   echo "Viewer is running with PID: $UFM_PID"
    ```
-2. 打开 **终端 2**（或同一个终端继续输入），使用 `ufm-msg` 发送远程动作：
+2. In **Terminal 2**, control the viewer remotely:
    ```bash
-   # 1. 遥控放大 2 倍
+   # 1. Remotely zoom in 2x
    ufm-msg $UFM_PID "zoom 2"
 
-   # 2. 遥控顺时针旋转 90 度
+   # 2. Remotely rotate clockwise by 90 degrees
    ufm-msg $UFM_PID "rotate by 90"
 
-   # 3. 遥控翻到下一张图片
+   # 3. Remotely advance to next image
    ufm-msg $UFM_PID "next"
 
-   # 4. 遥控动态打开一个新目录
+   # 4. Remotely append a new folder to playlist
    ufm-msg $UFM_PID "open /tmp/ufm-fixtures"
 
-   # 5. 遥控窗口退出
+   # 5. Remotely terminate viewer
    ufm-msg $UFM_PID "quit"
    ```
-3. **观察现象**：
-   - 终端 1 中的查看器窗口会像被遥控器控制一样，瞬间同步完成放大、旋转、切图，并在收到 `quit` 后优雅退出，临时套接字自动清理。
+3. **Visual Observation**:
+   - The window in Terminal 1 mirrors each command in real-time without latency, closing cleanly upon receiving `quit`. The socket at `$XDG_RUNTIME_DIR/ufm-$UFM_PID.sock` is automatically deleted.
 
 ---
 
-## 实战 7：文件修改外部热重载（Live Reload）
+## Practice 7: Live Disk Modification Hot Reloading
 
-用于验证“外部图片编辑器修改了文件后，查看器是否实时同步刷新”。
+Tests automatic filesystem monitoring and in-place reload.
 
-### 操作步骤
-1. 在 **终端 1** 中打开 PPM 测试图片：
+### Action Steps
+1. In **Terminal 1**, open a text-based PPM file:
    ```bash
    ufm /tmp/ufm-fixtures/sample_p3_ascii.ppm
    ```
-2. 在 **终端 2** 中，直接用 shell 脚本修改覆盖该文件的内容（改成纯黄色）：
+2. In **Terminal 2**, overwrite the file with solid yellow pixels:
    ```bash
    python3 -c '
    with open("/tmp/ufm-fixtures/sample_p3_ascii.ppm", "w") as f:
        f.write("P3\n100 100\n255\n" + "255 255 0 " * 10000)
    '
    ```
-3. **观察现象**：
-   - 你不需要关掉查看器也不需要按刷新键，在 0.5 秒之内，**终端 1 中的窗口自动检测到磁盘修改并重新渲染上屏，画面瞬间变成纯黄色**！
+3. **Visual Observation**:
+   - Within 0.5 seconds, without restarting or pressing refresh, **the open viewer window automatically detects the modification and refreshes the canvas to solid yellow**!
 
 ---
 
-## 实战 8：管道数据流与网络图片直接打开（零临时文件）
+## Practice 8: Direct Piped Streams & Zero-Disk Image Viewing
 
-验证标准输入流与管道式图片浏览。
+Tests pipeline integration and standard input streaming.
 
-### 操作步骤
-1. **通过管道传递路径列表**：
+### Action Steps
+1. **Piped file paths**:
    ```bash
    find /tmp/ufm-fixtures -name "*.ppm" | ufm
    ```
-   *现象*：查看器自动将从标准输入读到的所有路径组装为播放列表打开。
+   *Observation*: The viewer opens and constructs a playlist directly from piped filenames.
 
-2. **直接管道二进制流（`-`）**：
+2. **Piped binary image stream (`-`)**:
    ```bash
    cat /tmp/ufm-fixtures/vector_sample.svg | ufm -
    ```
-   *现象*：查看器无需保存到临时文件，直接从内存管道中解出图片并呈现。
+   *Observation*: Decodes and presents the image entirely from standard input memory without creating temporary files on disk.
 
 ---
 
-## 实战 9：Wayland 桌面拖拽（Drag & Drop）实测
+## Practice 9: Wayland Drag-and-Drop (DND) Ingestion
 
-### 操作步骤
-1. 启动一个完全空白的查看器：
+### Action Steps
+1. Launch an empty viewer:
    ```bash
    ufm
    ```
-   *现象*：启动一个纯黑底色的空白窗口等待图片。
-2. 打开系统自带的文件管理器（如 Nautilus、Dolphin、PCManFM-Qt 或 Thunar）。
-3. 随意选中系统中的一张图片，鼠标按住将其**拖拽放开进 `ufm` 窗口中**。
-4. **观察现象**：
-   - `ufm` 接收到 Wayland 拖拽事件（DND Payload），自动将其加载为当前画面并正常浏览！
+   *Observation*: A clean black window opens awaiting input.
+2. Open your system's Wayland file manager (Nautilus, Dolphin, PCManFM-Qt, or Thunar).
+3. Drag any image file from the file manager and drop it into the `ufm` window.
+4. **Visual Observation**:
+   - `ufm` consumes the Wayland DND URI payload and renders the dropped image immediately.
 
 ---
 
-## 一键自动化实战演练脚本
+## Turnkey Automated Live Verification Script
 
-如果你希望计算机自动替你模拟上述全过程并截图检验，可以直接运行：
+To run an automated test that launches `ufm`, captures real compositor screenshots, and verifies pixel values:
 
 ```bash
 ./tools/verify_live_run.sh
 ```
-
-脚本将自动执行拉起窗口、Vulkan 渲染、合成器截屏、提取像素校验色彩值、发送 IPC 旋转/翻页指令、最后优雅退出。

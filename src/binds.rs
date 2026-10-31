@@ -150,6 +150,7 @@ impl Binds {
         self.add(" ", "toggle_playing");
         self.add("t", "slideshow +1");
         self.add("<Shift+T>", "slideshow -1");
+        self.add("b", "transparency next");
     }
 }
 
