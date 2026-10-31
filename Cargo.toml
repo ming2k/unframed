@@ -1,0 +1,28 @@
+[package]
+name = "unframed"
+version = "0.1.0"
+edition = "2021"
+default-run = "unframed"
+
+[dependencies]
+iris = { path = "../optics/bindings/iris-rs/crates/iris" }
+flux = { path = "../optics/bindings/flux-rs/crates/flux" }
+lens = { path = "../optics/bindings/lens-rs/crates/lens" }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "tiff", "tga", "pnm", "qoi", "ico", "hdr", "ff"] }
+resvg = "0.45"
+
+[lib]
+name = "unframed"
+path = "src/lib.rs"
+
+[[bin]]
+name = "unframed"
+path = "src/main.rs"
+
+[[bin]]
+name = "unframed-msg"
+path = "src/bin/unframed_msg.rs"
+
+[[bin]]
+name = "imv-msg"
+path = "src/bin/imv_msg.rs"

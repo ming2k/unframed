@@ -1,0 +1,92 @@
+# Default config for unframed (imv-compatible)
+
+[options]
+# Suppress built-in key bindings and specify them explicitly in this config file
+suppress_default_binds = true
+
+# Initial window dimensions
+width = 1280
+height = 720
+
+# Scaling mode: none, shrink, full, crop
+scaling_mode = full
+
+# Upscaling method: linear, nearest_neighbour
+upscaling_method = linear
+
+# Background: 6-digit hex color code or 'checks'
+background = 000000
+
+# Overlay initial visibility
+overlay = false
+
+# Overlay text template
+overlay_text = [${imv_current_index}/${imv_file_count}] [${imv_width}x${imv_height}] [${imv_scale}%] $imv_current_file [$imv_scaling_mode]
+
+[aliases]
+# Define command aliases
+# alias = command to run
+q = quit
+n = next
+p = prev
+g = goto
+z = zoom
+o = open
+f = fullscreen
+d = overlay
+c = center
+r = reset
+s = scaling
+S = upscaling
+ss = slideshow
+bg = background
+
+[binds]
+# Navigation
+q = quit
+x = close
+<Left> = prev
+<bracketleft> = prev
+<Right> = next
+<bracketright> = next
+gg = goto 1
+<Shift+G> = goto -1
+
+# Panning
+j = pan 0 -50
+k = pan 0 50
+h = pan 50 0
+l = pan -50 0
+
+# Zooming
+<Up> = zoom 1
+<Shift+plus> = zoom 1
++ = zoom 1
+= = zoom 1
+i = zoom 1
+<Down> = zoom -1
+<minus> = zoom -1
+- = zoom -1
+o = zoom -1
+a = zoom actual
+
+# Transformations
+<Ctrl+r> = rotate by 90
+c = center
+r = reset
+
+# Display & UI
+f = fullscreen
+d = overlay
+s = scaling next
+<Shift+S> = upscaling next
+p = exec echo $imv_current_file
+
+# Animation playback
+<period> = next_frame
+. = next_frame
+<space> = toggle_playing
+
+# Slideshow control
+t = slideshow +1
+<Shift+T> = slideshow -1
