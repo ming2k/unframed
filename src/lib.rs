@@ -24,7 +24,7 @@ use app::App;
 use config::{find_config_file, parse_hex_color, BackgroundMode, Config, TransparencyGrid};
 use viewport::{ScalingMode, UpscalingMethod};
 
-pub const VERSION: &str = "0.1.0";
+pub const VERSION: &str = "0.0.1";
 
 pub fn print_help() {
     println!(
